@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>비하이브 로고 새 콘셉트</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+:root{--ink:#33302c;--orange:#e9822d;--blue:#3158de}
+*{box-sizing:border-box}
+body{margin:0;background:#f6f4ef;color:#26241f;font-family:"Noto Sans KR",system-ui,sans-serif}
+.wrap{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:52px 0 80px}
+h1{margin:0 0 8px;font-size:clamp(26px,4vw,38px);letter-spacing:-.04em}
+.lead{margin:0 0 34px;color:#77736d;font-size:15px;line-height:1.7;word-break:keep-all}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.opt{background:#fff;border-radius:18px;overflow:hidden;border:1px solid #ebe7df}
+.hero{display:grid;place-items:center;height:170px}
+.lockup{display:flex;align-items:center;gap:12px}
+.hero svg{width:64px;height:64px}
+.hero .word{font-size:34px;font-weight:800;letter-spacing:-.04em}
+.dark{display:flex;align-items:center;justify-content:center;gap:9px;height:64px;background:#24221f;color:#fff}
+.dark svg{width:28px;height:28px}.dark .word{font-size:18px;font-weight:800;letter-spacing:-.035em}
+.body{padding:16px 20px 20px;border-top:1px solid #f0ede7}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{padding:3px 8px;border-radius:99px;font-size:10.5px;font-weight:700}
+.c-warm{background:#fdecdc;color:#c0651c}.c-tech{background:#e8edfc;color:#3158de}.c-min{background:#efede8;color:#6d6860}.c-bee{background:#fff4cf;color:#9a7a12}
+.body h2{margin:10px 0 5px;font-size:17px;letter-spacing:-.03em}
+.body h2 small{font-size:12px;color:#a39d93;font-weight:700;margin-right:6px}
+.body p{margin:0 0 12px;color:#6f6a62;font-size:13px;line-height:1.6;word-break:keep-all}
+.minis{display:flex;align-items:center;gap:14px;padding-top:12px;border-top:1px dashed #e6e1d8;font-size:11px;color:#9a948a}
+.minis span{display:flex;align-items:center;gap:6px}
+.minis svg{width:16px;height:16px}
+.minis .fav{width:28px;height:28px;padding:3px;border-radius:7px;box-shadow:0 0 0 1px #e6e1d8}
+.note{margin-top:26px;padding:18px 20px;border-radius:14px;background:#fff;border:1px solid #ebe7df;font-size:13.5px;line-height:1.7;color:#5f5a52;word-break:keep-all}
+/* 어두운 배경에서 잉크색 → 흰색 */
+.dark .ink{fill:#fff}.dark .inks{stroke:#fff}
+.ink{fill:var(--ink)}.inks{stroke:var(--ink)}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<template id="marks">
+  <!-- N1 날개 단 커서 -->
+  <svg data-k="n1" viewBox="0 0 32 32"><ellipse cx="19.5" cy="9" rx="4.6" ry="2.8" transform="rotate(-35 19.5 9)" fill="#e9822d"/><ellipse cx="24" cy="13.2" rx="4.2" ry="2.5" transform="rotate(-8 24 13.2)" fill="#f5b880"/><path class="ink inks" d="M8 4.5V24.5L12.8 20.2L16.4 27.4L20 25.7L16.5 18.7L22.6 18.3Z" stroke-width="1.6" stroke-linejoin="round"/></svg>
+  <!-- N2 연필 끝 픽셀 -->
+  <svg data-k="n2" viewBox="0 0 32 32"><g transform="rotate(-45 16 16)"><rect x="10" y="12.8" width="13" height="6.4" rx="1" fill="#e9822d"/><rect class="ink" x="23" y="12.8" width="3.6" height="6.4" rx="1.2"/><path d="M10 12.8V19.2L4.6 16Z" fill="#f2d7b0"/><path class="ink" d="M6.4 14.95V17.05L4.6 16Z"/></g><rect class="ink" x="2.4" y="25.6" width="3" height="3" rx=".6"/><rect x="6.6" y="27.4" width="2.4" height="2.4" rx=".5" fill="#e9822d"/><rect class="ink" x="1.6" y="21.4" width="2.2" height="2.2" rx=".5" opacity=".55"/></svg>
+  <!-- N3 디지털 새싹 -->
+  <svg data-k="n3" viewBox="0 0 32 32"><path class="inks" d="M16 28V14.5M9.5 28H22.5" fill="none" stroke-width="2.4" stroke-linecap="round"/><path class="ink" d="M15.6 17.5C9.6 17.6 6 13.6 6.2 8C12 7.9 15.6 11.6 15.6 17.5Z"/><rect x="17.6" y="10" width="4.6" height="4.6" rx="1.1" fill="#e9822d"/><rect x="22.8" y="10" width="4.6" height="4.6" rx="1.1" fill="#e9822d"/><rect x="17.6" y="4.8" width="4.6" height="4.6" rx="1.1" fill="#f5b880"/></svg>
+  <!-- N4 윙크하는 말풍선 -->
+  <svg data-k="n4" viewBox="0 0 32 32"><path d="M7 4.5H25A4 4 0 0 1 29 8.5V18.5A4 4 0 0 1 25 22.5H14.5L8.5 27.8V22.5H7A4 4 0 0 1 3 18.5V8.5A4 4 0 0 1 7 4.5Z" fill="#e9822d"/><rect x="9.6" y="9.6" width="3" height="4.6" rx="1.5" fill="#fff"/><path d="M20.4 8.6L21.3 11.1L23.8 12L21.3 12.9L20.4 15.4L19.5 12.9L17 12L19.5 11.1Z" fill="#fff"/><path d="M10.6 17C13.6 19.6 18.2 19.6 21.2 17" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg>
+  <!-- N5 반짝이는 b -->
+  <svg data-k="n5" viewBox="0 0 32 32"><path class="inks" d="M8.5 3.8V24.6" fill="none" stroke-width="3.6" stroke-linecap="round"/><circle class="inks" cx="15.4" cy="18.6" r="6.6" fill="none" stroke-width="3.6"/><path d="M15.4 15.2L16.3 17.7L18.8 18.6L16.3 19.5L15.4 22L14.5 19.5L12 18.6L14.5 17.7Z" fill="#e9822d"/><path d="M25 3.6L25.9 6.1L28.4 7L25.9 7.9L25 10.4L24.1 7.9L21.6 7L24.1 6.1Z" fill="#e9822d"/></svg>
+  <!-- N6 겹치는 두 원 -->
+  <svg data-k="n6" viewBox="0 0 32 32"><circle cx="11.5" cy="16" r="8.5" fill="#e9822d"/><circle cx="20.5" cy="16" r="8.5" fill="#3158de"/><path class="ink" d="M16 9.5A8.5 8.5 0 0 1 16 22.5A8.5 8.5 0 0 1 16 9.5Z"/></svg>
+</template>
+
+<div class="wrap">
+  <h1>새 콘셉트 6가지</h1>
+  <p class="lead">'친근함 · AI/테크 · 미니멀'을 함께 담으면서, 궤적이나 점이 아닌 새로운 아이디어로 그려 봤습니다. 각 카드 위쪽의 색 태그로 어떤 느낌이 강한지 볼 수 있습니다.</p>
+  <div class="grid" id="grid"></div>
+  <p class="note">마음에 드는 번호를 알려주시면 다듬어서 사이트에 적용하겠습니다. 모두 별로라면 "이 회사 로고 느낌"처럼 참고할 만한 로고를 한두 개 알려주세요. 방향을 훨씬 빨리 잡을 수 있습니다.</p>
+</div>
+<script>
+const info={
+  n1:{t:'날개 단 커서',c:['warm','tech','bee'],d:'마우스 커서에 작은 벌 날개를 달았습니다. 디지털(AI·SW)과 벌을 한 번에 담고, 커서가 날아오르는 모습이 귀엽게 읽힙니다.'},
+  n2:{t:'연필 끝 픽셀',c:['warm','tech'],d:'연필로 쓴 자국이 픽셀로 바뀝니다. 손으로 배우던 것이 디지털로 이어진다는 뜻이고, 첫 화면의 연필 애니메이션과도 이어집니다.'},
+  n3:{t:'디지털 새싹',c:['warm','tech','min'],d:'한쪽 잎은 자연스러운 곡선, 다른 쪽 잎은 픽셀 블록입니다. 성장(교육)과 기술을 함께 보여주고 따뜻한 느낌이 강합니다.'},
+  n4:{t:'윙크하는 말풍선',c:['warm','tech'],d:'대화하는 말풍선이 윙크하며 웃습니다. 감은 눈이 AI 반짝이 모양이라, 친근한 AI 선생님 같은 인상을 줍니다.'},
+  n5:{t:'반짝이는 b',c:['tech','min'],d:'굵은 소문자 b 안에 AI 반짝이를 넣었습니다. 가장 단정하고 작은 크기에서도 또렷하며, 이름 첫 글자라 기억하기 쉽습니다.'},
+  n6:{t:'함께 만나는 두 원',c:['min','tech'],d:'주황(사람)과 파랑(기술)이 겹친 자리가 비하이브입니다. 사이트의 주황·파랑 색과 그대로 이어지고 가장 미니멀합니다.'}
+};
+const lab={warm:['c-warm','친근'],tech:['c-tech','AI·테크'],min:['c-min','미니멀'],bee:['c-bee','벌 요소']};
+const tpl=document.getElementById('marks').content, grid=document.getElementById('grid');
+let i=0;
+for(const k in info){i++;const m=()=>tpl.querySelector(`[data-k="${k}"]`).cloneNode(true);
+  const card=document.createElement('section');card.className='opt';
+  card.innerHTML=`<div class="hero"><div class="lockup"></div></div><div class="dark"></div><div class="body"><div class="chips">${info[k].c.map(c=>`<span class="chip ${lab[c][0]}">${lab[c][1]}</span>`).join('')}</div><h2><small>N${i}</small>${info[k].t}</h2><p>${info[k].d}</p><div class="minis"><span class="f">탭 아이콘</span><span class="s">16px</span></div></div>`;
+  const h=card.querySelector('.lockup');h.append(m());h.insertAdjacentHTML('beforeend','<span class="word">beehive</span>');
+  const d=card.querySelector('.dark');d.append(m());d.insertAdjacentHTML('beforeend','<span class="word">beehive</span>');
+  const f=m();f.classList.add('fav');card.querySelector('.f').prepend(f);card.querySelector('.s').prepend(m());
+  grid.append(card);}
+</script>
+</body>
+</html>

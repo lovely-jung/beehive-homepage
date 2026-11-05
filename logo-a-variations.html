@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>비하이브 로고 A안 변형</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+:root{--ink:#33302c;--orange:#e9822d}
+*{box-sizing:border-box}
+body{margin:0;background:#f6f4ef;color:#26241f;font-family:"Noto Sans KR",system-ui,sans-serif}
+.wrap{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:52px 0 80px}
+h1{margin:0 0 8px;font-size:clamp(26px,4vw,38px);letter-spacing:-.04em}
+.lead{margin:0 0 34px;color:#77736d;font-size:15px;line-height:1.7;word-break:keep-all}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.opt{background:#fff;border-radius:18px;overflow:hidden;border:1px solid #ebe7df}
+.hero{display:grid;place-items:center;height:170px}
+.lockup{display:flex;align-items:center;gap:12px}
+.hero svg{width:64px;height:64px;color:var(--ink)}
+.hero .word{font-size:34px;font-weight:800;letter-spacing:-.04em}
+.dark{display:flex;align-items:center;justify-content:center;gap:9px;height:64px;background:#24221f;color:#fff}
+.dark svg{width:28px;height:28px;color:#fff}.dark .word{font-size:18px;font-weight:800;letter-spacing:-.035em}
+.body{padding:16px 20px 20px;border-top:1px solid #f0ede7}
+.tag{display:inline-block;padding:3px 9px;border-radius:99px;background:#fdecdc;color:#c0651c;font-size:11px;font-weight:700}
+.tag.now{background:#222;color:#fff}
+.body h2{margin:9px 0 5px;font-size:17px;letter-spacing:-.03em}
+.body p{margin:0 0 12px;color:#6f6a62;font-size:13px;line-height:1.6;word-break:keep-all}
+.minis{display:flex;align-items:center;gap:14px;padding-top:12px;border-top:1px dashed #e6e1d8;font-size:11px;color:#9a948a}
+.minis span{display:flex;align-items:center;gap:6px}
+.minis svg{width:16px;height:16px;color:var(--ink)}
+.minis .fav{width:28px;height:28px;padding:3px;border-radius:7px;box-shadow:0 0 0 1px #e6e1d8}
+.note{margin-top:26px;padding:18px 20px;border-radius:14px;background:#fff;border:1px solid #ebe7df;font-size:13.5px;line-height:1.7;color:#5f5a52;word-break:keep-all}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- A1 현재: 점선 궤적 -->
+  <symbol id="a1" viewBox="0 0 32 32">
+    <path d="M4.5 26.5C11 27 9.5 16 16.5 15.5S22 9 25 7.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-dasharray="0.1 4.2"/>
+    <circle cx="4.5" cy="26.5" r="2" fill="currentColor"/>
+    <circle cx="25.5" cy="7" r="4.6" fill="#e9822d"/>
+  </symbol>
+  <!-- A2 고리 비행: 한 번 맴돌고 날아오름 -->
+  <symbol id="a2" viewBox="0 0 32 32">
+    <path d="M3.5 27.5C8.5 27.5 11 24 12 19.5C13 14.5 19.5 13 19.5 17C19.5 21 13.2 20.5 14 15.5C14.8 10.8 19 8.6 22.5 8" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="26" cy="7" r="4.3" fill="#e9822d"/>
+  </symbol>
+  <!-- A3 궤적으로 그린 b -->
+  <symbol id="a3" viewBox="0 0 32 32">
+    <path d="M8.5 4.5V25M8.5 17.5C10.5 13 20.5 12.2 20.5 19.5C20.5 26.2 11.5 27 8.5 23" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-dasharray="0.1 3.9"/>
+    <circle cx="25" cy="6.5" r="4.2" fill="#e9822d"/>
+  </symbol>
+  <!-- A4 자라는 점: 작은 점 → 큰 점 -->
+  <symbol id="a4" viewBox="0 0 32 32">
+    <circle cx="5.5" cy="26" r="2.3" fill="currentColor"/>
+    <circle cx="12.5" cy="19" r="3.3" fill="currentColor"/>
+    <circle cx="22" cy="10" r="6" fill="#e9822d"/>
+  </symbol>
+  <!-- A5 원형 배지 -->
+  <symbol id="a5" viewBox="0 0 32 32">
+    <circle cx="16" cy="16" r="15" fill="#e9822d"/>
+    <path d="M7 23C12.5 23.4 11.5 16.2 17 15.8S20.5 11 22 10" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0.1 3.6"/>
+    <circle cx="7" cy="23" r="1.7" fill="#fff"/>
+    <circle cx="23" cy="9.3" r="3.4" fill="#fff"/>
+  </symbol>
+  <!-- A6 궤적 끝의 작은 벌 -->
+  <symbol id="a6" viewBox="0 0 32 32">
+    <path d="M3.5 27.5C9 28 8.5 20 14 19.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0.1 3.8"/>
+    <ellipse cx="19.6" cy="5.8" rx="2.6" ry="3.6" transform="rotate(-25 19.6 5.8)" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <ellipse cx="24.8" cy="6.4" rx="2.6" ry="3.6" transform="rotate(20 24.8 6.4)" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <ellipse cx="21.8" cy="13" rx="5.2" ry="4.2" transform="rotate(-30 21.8 13)" fill="#e9822d"/>
+    <path d="M20.4 9.9l2.9 5.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <h1>A안 변형 — 날아간 궤적</h1>
+  <p class="lead">'벌이 날아간 길 = 배움의 여정'이라는 생각은 그대로 두고, 표현을 바꿔 본 여섯 가지입니다. 큰 크기, 어두운 배경, 탭 아이콘 크기에서 함께 비교해 보세요.</p>
+  <div class="grid">
+    <section class="opt"><div class="hero"><div class="lockup"><svg><use href="#a1"/></svg><span class="word">beehive</span></div></div><div class="dark"><svg><use href="#a1"/></svg><span class="word">beehive</span></div>
+      <div class="body"><span class="tag now">A1 · 지금 적용된 안</span><h2>점선 궤적</h2><p>점점이 날아오른 길이 주황 점에 닿습니다. 가볍지만 작은 크기에서는 점선이 흐립니다.</p><div class="minis"><span><svg class="fav"><use href="#a1"/></svg>탭 아이콘</span><span><svg><use href="#a1"/></svg>16px</span></div></div></section>
+
+    <section class="opt"><div class="hero"><div class="lockup"><svg><use href="#a2"/></svg><span class="word">beehive</span></div></div><div class="dark"><svg><use href="#a2"/></svg><span class="word">beehive</span></div>
+      <div class="body"><span class="tag">A2</span><h2>고리 비행</h2><p>한 번 맴돌았다가 날아오르는 벌의 움직임입니다. 이어진 한 줄이라 작은 크기에서도 선명하고, 고민하다 성장하는 과정처럼 읽힙니다.</p><div class="minis"><span><svg class="fav"><use href="#a2"/></svg>탭 아이콘</span><span><svg><use href="#a2"/></svg>16px</span></div></div></section>
+
+    <section class="opt"><div class="hero"><div class="lockup"><svg><use href="#a3"/></svg><span class="word">beehive</span></div></div><div class="dark"><svg><use href="#a3"/></svg><span class="word">beehive</span></div>
+      <div class="body"><span class="tag">A3</span><h2>궤적으로 그린 b</h2><p>벌이 날아다닌 점선이 그대로 소문자 b가 됩니다. 이름의 첫 글자가 숨어 있어 기억에 남기 쉽습니다.</p><div class="minis"><span><svg class="fav"><use href="#a3"/></svg>탭 아이콘</span><span><svg><use href="#a3"/></svg>16px</span></div></div></section>
+
+    <section class="opt"><div class="hero"><div class="lockup"><svg><use href="#a4"/></svg><span class="word">beehive</span></div></div><div class="dark"><svg><use href="#a4"/></svg><span class="word">beehive</span></div>
+      <div class="body"><span class="tag">A4</span><h2>자라는 점</h2><p>작은 점에서 큰 주황 점으로 커지며 올라갑니다. 초등학생이 어른으로 자라는 첫 화면과 잘 맞고, 가장 단순해서 어디에 써도 깔끔합니다.</p><div class="minis"><span><svg class="fav"><use href="#a4"/></svg>탭 아이콘</span><span><svg><use href="#a4"/></svg>16px</span></div></div></section>
+
+    <section class="opt"><div class="hero"><div class="lockup"><svg><use href="#a5"/></svg><span class="word">beehive</span></div></div><div class="dark"><svg><use href="#a5"/></svg><span class="word">beehive</span></div>
+      <div class="body"><span class="tag">A5</span><h2>원형 배지</h2><p>A1을 주황 원 안에 담았습니다. 흰 배경과 어두운 배경 어디서나 같은 느낌이고, 프로필 사진이나 앱 아이콘으로 바로 쓰기 좋습니다.</p><div class="minis"><span><svg class="fav"><use href="#a5"/></svg>탭 아이콘</span><span><svg><use href="#a5"/></svg>16px</span></div></div></section>
+
+    <section class="opt"><div class="hero"><div class="lockup"><svg><use href="#a6"/></svg><span class="word">beehive</span></div></div><div class="dark"><svg><use href="#a6"/></svg><span class="word">beehive</span></div>
+      <div class="body"><span class="tag">A6</span><h2>궤적 끝의 작은 벌</h2><p>점 대신 날개 달린 작은 벌이 날아갑니다. '비하이브'라는 이름이 바로 떠오르고 친근하지만, 작은 크기에서는 디테일이 뭉칩니다.</p><div class="minis"><span><svg class="fav"><use href="#a6"/></svg>탭 아이콘</span><span><svg><use href="#a6"/></svg>16px</span></div></div></section>
+  </div>
+  <p class="note">마음에 드는 번호를 알려주시면 사이트 상단·하단 로고와 브라우저 탭 아이콘에 적용하겠습니다. "A2인데 더 굵게", "A4에 점선 추가"처럼 섞거나 고치는 것도 가능합니다.</p>
+</div>
+</body>
+</html>

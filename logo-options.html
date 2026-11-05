@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>비하이브 로고 시안</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+:root{--ink:#33302c;--orange:#e9822d;--blue:#3158de;--paper:#f6f4ef}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:#26241f;font-family:"Noto Sans KR",system-ui,sans-serif}
+.wrap{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:56px 0 80px}
+h1{margin:0 0 8px;font-size:clamp(26px,4vw,40px);letter-spacing:-.04em}
+.lead{margin:0 0 36px;color:#77736d;font-size:15px;line-height:1.7;word-break:keep-all}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.opt{background:#fff;border-radius:20px;overflow:hidden;border:1px solid #ebe7df}
+.hero{display:grid;place-items:center;height:220px;background:#fff;border-bottom:1px solid #f0ede7}
+.hero .lockup{display:flex;align-items:center;gap:14px}
+.hero svg{width:72px;height:72px}
+.hero .word{font-size:40px;font-weight:800;letter-spacing:-.04em}
+.dark{display:flex;align-items:center;justify-content:center;gap:10px;height:76px;background:#24221f;color:#fff}
+.dark svg{width:32px;height:32px}.dark .word{font-size:20px;font-weight:800;letter-spacing:-.035em}
+.body{padding:20px 22px 24px}
+.tag{display:inline-block;padding:3px 9px;border-radius:99px;background:#fdecdc;color:#c0651c;font-size:11px;font-weight:700}
+.tag.now{background:#222;color:#fff}
+.body h2{margin:10px 0 6px;font-size:19px;letter-spacing:-.03em}
+.body p{margin:0 0 14px;color:#6f6a62;font-size:13.5px;line-height:1.65;word-break:keep-all}
+.minis{display:flex;align-items:center;gap:16px;padding-top:14px;border-top:1px dashed #e6e1d8;font-size:11px;color:#9a948a}
+.minis span{display:flex;align-items:center;gap:6px}
+.minis svg{width:16px;height:16px}
+.fav{width:28px!important;height:28px!important;border-radius:7px;background:#fff;box-shadow:0 0 0 1px #e6e1d8}
+.note{margin-top:28px;padding:18px 20px;border-radius:14px;background:#fff;border:1px solid #ebe7df;font-size:13.5px;line-height:1.7;color:#5f5a52;word-break:keep-all}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.hero{height:180px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- A. 날아간 궤적 -->
+  <symbol id="mA" viewBox="0 0 32 32">
+    <path d="M4.5 26.5C11 27 9.5 16 16.5 15.5S22 9 25 7.5" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-dasharray="0.1 4.2"/>
+    <circle cx="4.5" cy="26.5" r="2" fill="currentColor"/>
+    <circle cx="25.5" cy="7" r="4.6" fill="#e9822d"/>
+  </symbol>
+  <!-- B. b 모노그램 + 점 -->
+  <symbol id="mB" viewBox="0 0 32 32">
+    <rect x="1" y="1" width="30" height="30" rx="9" fill="#e9822d"/>
+    <path d="M10.5 7.5v16.5" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <circle cx="15.8" cy="19.2" r="5.3" stroke="#fff" stroke-width="3" fill="none"/>
+    <circle cx="23.5" cy="8.8" r="2.4" fill="#fff"/>
+  </symbol>
+  <!-- C. 펼친 책 = 날개 -->
+  <symbol id="mC" viewBox="0 0 32 32">
+    <path d="M16 25.5C12.5 22.5 7 21.6 3.5 22.2V8.6C7.4 7.8 12.6 9 16 12.2Z" fill="#e9822d"/>
+    <path d="M16 25.5C19.5 22.5 25 21.6 28.5 22.2V8.6C24.6 7.8 19.4 9 16 12.2Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+    <circle cx="16" cy="6" r="2.3" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <h1>비하이브 로고 시안</h1>
+  <p class="lead">벌집 모양 대신, '벌'과 '배움의 여정'을 단순한 형태로 담은 세 가지 방향입니다. 큰 크기와 어두운 배경, 브라우저 탭 아이콘처럼 아주 작은 크기에서 어떻게 보이는지 함께 비교해 보세요.</p>
+
+  <div class="grid">
+    <section class="opt">
+      <div class="hero"><div class="lockup"><svg style="color:var(--ink)"><use href="#mA"/></svg><span class="word">beehive</span></div></div>
+      <div class="dark"><svg style="color:#fff"><use href="#mA"/></svg><span class="word">beehive</span></div>
+      <div class="body">
+        <span class="tag now">A · 현재 사이트에 적용</span>
+        <h2>날아간 궤적</h2>
+        <p>벌이 점점이 날아오른 길이 주황 점에 닿는 모양입니다. 첫 화면에서 아이가 길을 따라 자라는 애니메이션과 같은 이야기를 합니다. 가볍고 세련됐지만, 아주 작게 쓰면 점선이 흐려질 수 있습니다.</p>
+        <div class="minis"><span><svg class="fav" style="color:var(--ink);padding:3px"><use href="#mA"/></svg>탭 아이콘</span><span><svg style="color:var(--ink)"><use href="#mA"/></svg>16px</span></div>
+      </div>
+    </section>
+
+    <section class="opt">
+      <div class="hero"><div class="lockup"><svg><use href="#mB"/></svg><span class="word">beehive</span></div></div>
+      <div class="dark"><svg><use href="#mB"/></svg><span class="word">beehive</span></div>
+      <div class="body">
+        <span class="tag">B</span>
+        <h2>b 모노그램 + 작은 벌</h2>
+        <p>주황 바탕 위의 소문자 b와, 그 옆을 나는 작은 점(벌)입니다. 앱 아이콘, 프로필 사진, 명함처럼 정사각형 자리에서 가장 잘 보이고 작은 크기에서도 또렷합니다.</p>
+        <div class="minis"><span><svg class="fav"><use href="#mB"/></svg>탭 아이콘</span><span><svg><use href="#mB"/></svg>16px</span></div>
+      </div>
+    </section>
+
+    <section class="opt">
+      <div class="hero"><div class="lockup"><svg style="color:var(--ink)"><use href="#mC"/></svg><span class="word">beehive</span></div></div>
+      <div class="dark"><svg style="color:#fff"><use href="#mC"/></svg><span class="word">beehive</span></div>
+      <div class="body">
+        <span class="tag">C</span>
+        <h2>펼친 책 = 날개</h2>
+        <p>펼친 책 두 장이 벌의 날개처럼 보이고, 위의 점이 머리가 됩니다. '교육'이 가장 직접적으로 읽히는 방향으로, 학교·기관 대상 자료에서 신뢰감을 주기 좋습니다.</p>
+        <div class="minis"><span><svg class="fav" style="color:var(--ink);padding:3px"><use href="#mC"/></svg>탭 아이콘</span><span><svg style="color:var(--ink)"><use href="#mC"/></svg>16px</span></div>
+      </div>
+    </section>
+  </div>
+
+  <p class="note">마음에 드는 방향을 알려주시면 사이트 상단·하단 로고와 브라우저 탭 아이콘(파비콘)에 적용하겠습니다. 두 시안을 섞거나(예: B의 점 + C의 책), 색이나 글자 모양을 바꾸는 것도 가능합니다. 정식 브랜드 로고로 쓰려면 마지막에 전문 디자이너가 다듬는 것을 권합니다.</p>
+</div>
+</body>
+</html>
