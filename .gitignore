@@ -1,2 +1,5 @@
 .claude/
 .DS_Store
+# 비밀 정보 (토큰·비밀번호) — 절대 GitHub에 올리지 않음
+.env
+.env.*
