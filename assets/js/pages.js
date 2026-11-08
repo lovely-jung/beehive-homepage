@@ -5,6 +5,7 @@
 (function () {
   var CATS = window.BH_CATEGORIES || [], COURSES = window.BH_COURSES || [], LV = window.BH_LEVELS || {};
   var LV_ORDER = ['elem', 'mid', 'high', 'univ', 'adult'];
+  var MAIN_CATS = CATS.filter(function (c) { return !c.separate; });
   var q = new URLSearchParams(location.search);
   var root = document.getElementById('page');
   var kind = document.body.getAttribute('data-page');
@@ -14,7 +15,7 @@
   var levelsOf = function (c) { return LV_ORDER.filter(function (k) { return c.levels && c.levels[k]; }); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
   var badges = function (c) { return '<span class="lv">' + levelsOf(c).map(function (k) { return '<b title="' + LV[k].label + '">' + LV[k].short + '</b>'; }).join('') + '</span>'; };
-  var section = function (c) { return c && c.id === 'biz' ? '기업·기관 교육' : '교육 프로그램'; };
+  var section = function () { return '교육 프로그램'; };
   var note = function (text) {
     if (!text) { document.body.classList.add('no-note'); return ''; }
     return '<div class="sample-note">' + esc(text) + '</div>';
@@ -39,7 +40,7 @@
 
   /* ---------------- 분야 페이지 ---------------- */
   function renderProgram() {
-    var cat = catOf(q.get('cat')) || CATS[0];
+    var cat = catOf(q.get('cat')); if (!cat || cat.separate) cat = MAIN_CATS[0];
     document.title = cat.full + ' | 비하이브';
     var all = coursesIn(cat.id);
     var hasSample = all.some(function (c) { return c.sample; });
@@ -142,14 +143,15 @@
         '<nav class="crumb" aria-label="현재 위치"><a href="./">홈</a><span>›</span><span>커리큘럼</span></nav>' +
         '<h1>모든 수업을 한눈에</h1><p class="page-lead">분야와 대상을 골라 보세요. 수업을 누르면 초 · 중 · 고 대상별로 무엇이 달라지는지 자세히 볼 수 있습니다.</p>' +
         '<div class="filters">' +
-          '<div class="f-row" data-key="cat"><span>분야</span><button data-v="all">전체</button>' + CATS.map(function (c) { return '<button data-v="' + c.id + '">' + esc(c.name) + '</button>'; }).join('') + '</div>' +
-          '<div class="f-row" data-key="lv"><span>대상</span><button data-v="all">전체</button>' + LV_ORDER.map(function (k) { return '<button data-v="' + k + '">' + LV[k].label + '</button>'; }).join('') + '</div>' +
+          '<div class="f-row" data-key="cat"><span>분야</span><button data-v="all">전체</button>' + MAIN_CATS.map(function (c) { return '<button data-v="' + c.id + '">' + esc(c.name) + '</button>'; }).join('') + '</div>' +
+          '<div class="f-row" data-key="lv"><span>대상</span><button data-v="all">전체</button>' + LV_ORDER.map(function (k) { return '<button data-v="' + k + '">' + (k === 'adult' ? '교원' : LV[k].label) + '</button>'; }).join('') + '</div>' +
         '</div></div></section>' +
       '<div class="content-wrap" style="padding-bottom:20px"><p class="cur-count" id="curCount"></p><table class="cur-table"><thead><tr><th style="width:110px">분야</th><th>수업</th><th style="width:170px">대상</th><th style="width:100px">차시</th><th style="width:170px">운영 형태</th></tr></thead><tbody id="curBody"></tbody></table></div>' +
       cta('찾는 수업이 없나요?', '원하는 주제와 대상을 알려주시면 새로 설계해 드립니다.');
 
     function draw() {
       var list = COURSES.filter(function (c) {
+        if (c.cat === 'biz') return false;
         var okCat = state.cat === 'all' || c.cat === state.cat || (c.also || []).some(function (a) { return a.cat === state.cat; });
         var okLv = state.lv === 'all' || !!c.levels[state.lv];
         return okCat && okLv;

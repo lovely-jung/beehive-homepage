@@ -37,9 +37,9 @@ a{color:inherit}
 .nav-trigger:after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg);opacity:.6}
 .nav-trigger.is-current{opacity:1;color:#c66e21}
 /* 교육 프로그램 큰 메뉴 (4칸) */
-.mega{position:absolute;top:100%;left:50%;width:min(880px,calc(100vw - 40px));padding:22px 22px 12px;background:#fff;border:1px solid #efede9;border-radius:0 0 22px 22px;box-shadow:0 26px 50px rgba(35,30,23,.14);opacity:0;visibility:hidden;transform:translate(-50%,8px);transition:opacity .18s,transform .18s,visibility .18s}
+.mega{position:absolute;top:100%;left:50%;width:min(1000px,calc(100vw - 40px));padding:22px 22px 12px;background:#fff;border:1px solid #efede9;border-radius:0 0 22px 22px;box-shadow:0 26px 50px rgba(35,30,23,.14);opacity:0;visibility:hidden;transform:translate(-50%,8px);transition:opacity .18s,transform .18s,visibility .18s}
 .nav-dropdown:hover .mega,.nav-dropdown:focus-within .mega,.nav-dropdown.open .mega{opacity:1;visibility:visible;transform:translate(-50%,0)}
-.mega-cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mega-cols{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .mega-col{padding:6px 8px 10px;border-radius:14px}
 .mega-head{display:flex;align-items:center;gap:10px;padding:6px 6px 12px;margin-bottom:6px;border-bottom:1px solid #f0ede8;color:#222;text-decoration:none}
 .mega-head b{font-size:16px;font-weight:800;letter-spacing:-.02em}
@@ -47,11 +47,14 @@ a{color:inherit}
 .mega-col ul{margin:0;padding:0;list-style:none;display:grid;gap:2px}
 .mega-col li a{display:block;padding:8px 6px;border-radius:8px;font-size:13.5px;color:#5a554d;text-decoration:none}
 .mega-col li a:hover{background:#f8f5f0;color:#bd671e}
-.mega-all{display:flex;justify-content:space-between;margin-top:10px;padding:14px 14px 6px;border-top:1px solid #f0ede8;font-size:13px;font-weight:700;color:#bd671e;text-decoration:none}
+.mega-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding:12px 8px 4px;border-top:1px solid #f0ede8}
+.mega-all{display:flex;gap:10px;font-size:13px;font-weight:700;color:#bd671e;text-decoration:none}
+.mega-biz{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:99px;background:#1d2027;color:#d8dbe2;font-size:12.5px;text-decoration:none}
+.mega-biz b{color:#fff}.mega-biz span{color:#e9a05b}.mega-biz:hover{background:#2a2e37}
 .mega-all span{transition:transform .15s}.mega-all:hover span{transform:translateX(3px)}
 .np-icon{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:11px}
 .np-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.np-icon.ai{background:#e8edfc;color:var(--blue)}.np-icon.sw{background:#fdecdc;color:#d4701f}.np-icon.career{background:#e9f1e4;color:#4f7a45}.np-icon.conv{background:#efe9f6;color:#6b4fa0}.np-icon.biz{background:#ece9e3;color:#33302c}
+.np-icon.ai{background:#e8edfc;color:var(--blue)}.np-icon.sw{background:#fdecdc;color:#d4701f}.np-icon.career{background:#e9f1e4;color:#4f7a45}.np-icon.conv{background:#efe9f6;color:#6b4fa0}.np-icon.biz{background:#ece9e3;color:#33302c}.np-icon.teacher{background:#e6f0f2;color:#2f6f7c}
 .global-menu-toggle{display:none}
 @media(max-width:1020px){
   .global-links{gap:18px}
@@ -73,10 +76,24 @@ a{color:inherit}
   .mega-head b{font-size:14.5px}
   .np-icon{width:30px;height:30px;border-radius:9px}.np-icon svg{width:16px;height:16px}
   .mega-col li a{padding:7px 4px;font-size:13px}
-  .mega-all{margin:6px 8px 0;padding:10px 0 2px}
+  .mega-foot{flex-direction:column;align-items:stretch;margin:6px 4px 0;padding:10px 4px 2px}
+  .mega-biz{justify-content:center}
   .global-links>a.nav-cta{margin-top:6px;text-align:center}
 }
 .global-links>a[aria-current="page"]{opacity:1;color:#c66e21}
+
+/* 기업 · 공공기관 교육 배너 (모든 메인 페이지 푸터 위) */
+.biz-banner{padding:0 0 40px}
+.biz-banner-in{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:28px 32px;border-radius:22px;background:#1d2027;color:#fff;text-decoration:none;position:relative;overflow:hidden}
+.biz-banner-in:after{content:"";position:absolute;right:-60px;top:-80px;width:240px;height:240px;border-radius:50%;border:1px solid rgba(255,255,255,.12);box-shadow:0 0 0 30px rgba(255,255,255,.03)}
+.bb-copy{position:relative;z-index:1;display:grid;gap:6px}
+.bb-copy small{font-size:11px;font-weight:700;letter-spacing:.16em;color:#8f96a3}
+.bb-copy b{font-size:clamp(19px,2vw,24px);letter-spacing:-.04em}
+.bb-copy em{font-style:normal;font-size:13.5px;color:#aab0bb;word-break:keep-all}
+.bb-go{position:relative;z-index:1;flex:none;display:inline-flex;align-items:center;gap:10px;padding:14px 20px;border-radius:99px;background:#fff;color:#1d2027;font-size:14px;font-weight:700}
+.bb-go i{font-style:normal;color:#e9822d;transition:transform .2s}
+.biz-banner-in:hover .bb-go i{transform:translate(3px,-3px)}
+@media(max-width:820px){.biz-banner-in{flex-direction:column;align-items:flex-start;padding:24px 22px}.biz-banner{padding-bottom:28px}}
 
 /* =========================================================
    공통 섹션 · 문의 띠 · 푸터

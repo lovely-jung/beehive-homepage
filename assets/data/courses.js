@@ -3,7 +3,7 @@
    메뉴 · 분야 페이지 · 수업 상세 · 커리큘럼 표가 함께 바뀝니다.
 
    수업 추가 방법: COURSES 배열에 { ... } 한 덩어리를 복사해 붙이고 내용만 바꾸세요.
-   - cat  : 분야 (ai / sw / career / conv / biz)
+   - cat  : 분야 (ai / sw / career / conv / teacher / biz)  ※ biz는 비즈니스 사이트(biz/)에만 나옵니다
    - sub  : 분야 안의 하위 묶음 (아래 CATEGORIES의 subs id)
    - levels: 대상별 구성 (elem 초등 / mid 중등 / high 고등 / univ 대학 / adult 성인)
              없는 대상은 빼면 탭에서 자동으로 숨겨집니다.
@@ -15,7 +15,7 @@ window.BH_LEVELS = {
   mid:   { label: '중등',      short: '중' },
   high:  { label: '고등',      short: '고' },
   univ:  { label: '대학',      short: '대' },
-  adult: { label: '성인·실무', short: '성인' }
+  adult: { label: '교원', short: '교원' }   /* 메인 사이트에서는 교원 연수에만 쓰입니다 */
 };
 
 window.BH_CATEGORIES = [
@@ -35,10 +35,15 @@ window.BH_CATEGORIES = [
     lead: 'AI와 SW를 도구로 독서, 금융, 과학 같은 교과를 새롭게 배웁니다.',
     why: '도구를 배우는 데서 끝나지 않고, 교과 안에서 직접 써 볼 때 배움이 생기부와 진로로 이어집니다.',
     subs: [ { id: 'reading', name: 'AI 독서' }, { id: 'finance', name: 'AI 금융 · 경제' }, { id: 'science', name: 'AI 과학 · MBL' } ] },
-  { id: 'biz', name: '기업·기관', full: '기업 · 기관 교육', color: 'dark', separate: true,
-    lead: '기업 임직원, 공공기관, 학교 선생님과 학부모를 위한 실무 중심 AI 교육입니다.',
+  { id: 'teacher', name: '교원 연수', full: '교원 연수', color: 'dark',
+    lead: '선생님이 수업과 업무에 AI를 바로 쓸 수 있도록, 학교 현장에 맞춘 연수를 운영합니다.',
+    why: 'AI를 늦게 접한 선생님도 교실에서 바로 쓸 방법만 알면, 수업은 풍성해지고 업무는 가벼워집니다.',
+    subs: [ { id: 'ai-class', name: 'AI 수업 활용' }, { id: 'guidance', name: '진로 · 학업 지도' } ] },
+  /* 기업 · 공공기관 교육은 별도 사이트(biz/)에서만 보여줍니다 (separate: true) */
+  { id: 'biz', name: '기업·공공기관', full: '기업 · 공공기관 교육', color: 'dark', separate: true,
+    lead: '기업 임직원과 공공기관을 위한 실무 중심 AI 교육입니다.',
     why: '도구 소개로 끝나는 강의가 아니라, 다음 주부터 일하는 방식이 달라지는 교육을 목표로 합니다.',
-    subs: [ { id: 'corp', name: '기업 임직원' }, { id: 'public', name: '공공기관 · 지역' }, { id: 'school', name: '교원 · 학부모 연수' } ] }
+    subs: [ { id: 'corp', name: '기업 임직원' }, { id: 'public', name: '공공기관 · 지역' } ] }
 ];
 
 window.BH_COURSES = [
@@ -267,7 +272,7 @@ window.BH_COURSES = [
       adult: { goal: '생활 속 디지털 기기를 두려움 없이 쓴다', time: '4회 × 90분',
         steps: ['스마트폰 AI 비서 쓰기', '키오스크 · 앱 예약', 'AI 보이스피싱 · 가짜 영상 구별', '사진 · 영상 남기기'], tools: '개인 스마트폰, 키오스크 연습 화면', output: '나만의 디지털 생활 수첩', link: '지역 평생교육' }
     } },
-  { id: 'biz-teacher', cat: 'biz', sub: 'school', sample: true,
+  { id: 'teacher-genai', cat: 'teacher', sub: 'ai-class', sample: true,
     title: '선생님을 위한 생성형 AI',
     summary: '수업 설계, 평가, 행정 업무에 생성형 AI를 쓰는 교원 연수',
     format: ['연수'], prep: '1인 1노트북',
@@ -275,12 +280,12 @@ window.BH_COURSES = [
       adult: { goal: '내 수업 하나를 AI 활용 수업으로 다시 설계한다', time: '3시간 / 15시간 (직무연수)',
         steps: ['교실 속 생성형 AI 활용 원칙', '수업 자료 · 평가 문항 만들기', '행정 업무 줄이기', 'AI 활용 수업 설계'], tools: '생성형 AI, 수업 설계 템플릿', output: 'AI 활용 수업 지도안', link: '교원 연수 · 연구회' }
     } },
-  { id: 'biz-parent', cat: 'biz', sub: 'school', sample: true,
-    title: '학부모 AI 교실',
-    summary: '아이의 AI 사용을 어떻게 지도할지, 집에서 함께 쓰는 방법을 알려드립니다',
-    format: ['학부모 연수'], prep: '개인 스마트폰 또는 노트북',
+  { id: 'teacher-credit', cat: 'teacher', sub: 'guidance', sample: true,
+    title: '고교학점제 진로 · 학업 설계 지도',
+    summary: '학생의 진로와 과목 선택을 연결해 지도하는 방법을, AI 도구와 실제 사례로 익히는 교원 연수',
+    format: ['연수'], prep: '1인 1노트북, 학교 교육과정 편성표',
     levels: {
-      adult: { goal: '자녀와 함께 AI 사용 약속을 만든다', time: '2시간',
-        steps: ['아이들은 AI를 어떻게 쓰고 있나', '함께 써 보기', '가정 AI 사용 약속 만들기'], tools: '생성형 AI', output: '우리 집 AI 사용 약속', link: '학부모 연수' }
-    } }
+      adult: { goal: '학생 상담에서 진로와 과목 선택을 근거 있게 연결해 안내한다', time: '3시간 / 15시간 (직무연수)',
+        steps: ['고교학점제와 과목 선택의 흐름', '진로 · 학업 설계 상담 사례', 'AI로 학과 · 과목 정보 정리하기', '우리 학교용 상담 자료 만들기'], tools: '생성형 AI, 학교 편성표, 상담 양식', output: '우리 학교 과목 선택 상담 자료', link: '교원 연수 · 진로진학 지도' }
+    } },
 ];
