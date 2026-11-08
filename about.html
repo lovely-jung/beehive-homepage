@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <link rel="stylesheet" href="assets/css/common.css">
-<script src="assets/js/common.js" defer></script>
 <style>
 /* ---------- 소개 페이지 ---------- */
 .about-page h1,.about-page h2,.about-page h3,.about-page p{word-break:keep-all}
@@ -202,20 +201,9 @@
 </style>
 </head>
 <body class="about-page">
-<nav class="global-nav" id="global-top" aria-label="비하이브 주요 메뉴">
-  <a class="global-brand" href="./" aria-label="비하이브 홈"><span class="brand-word">beehive</span></a>
-  <button class="global-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primaryLinks">☰</button>
-  <div class="global-links" id="primaryLinks">
-    <a href="about.html" aria-current="page">비하이브 소개</a>
-    <div class="nav-dropdown">
-      <button class="nav-trigger" type="button" aria-expanded="false">교육 프로그램</button>
-      <div class="nav-submenu"><a class="nav-prog" href="./#ai"><span class="np-icon ai"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg></span><span class="np-text"><b>AI 교육</b><small>생성형 AI 활용부터 원리·윤리까지</small><em>초·중·고 · 대학 · 기업</em></span></a><a class="nav-prog" href="./#sw"><span class="np-icon sw"><svg viewBox="0 0 24 24"><path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15"/></svg></span><span class="np-text"><b>SW 교육</b><small>코딩과 프로젝트로 직접 만들어 보기</small><em>초·중·고 · 대학 · 기업</em></span></a><a class="nav-prog" href="./#career"><span class="np-icon career"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.8 8.2l-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg></span><span class="np-text"><b>진로 교육</b><small>강점을 발견하고 다음 단계를 설계하기</small><em>초·중·고 · 대학</em></span></a><a class="np-all" href="./#programs">전체 프로그램 한눈에 보기 <span>→</span></a></div>
-    </div>
-    <a href="./#curriculum">커리큘럼</a>
-    <a href="./#stories">교육 사례</a>
-    <a class="nav-cta" href="./#contact">교육 문의</a>
-  </div>
-</nav>
+<div id="site-nav"></div>
+<script src="assets/data/courses.js"></script>
+<script src="assets/js/site.js"></script>
 
 <main>
   <!-- ▼ 예시 자료 안내: 실제 자료로 바꾼 뒤 이 한 줄(div.sample-note)만 지우면 됩니다 -->
@@ -366,10 +354,10 @@
         <div><div class="section-kicker"><span>FIND YOUR PROGRAM</span><i></i><span>어떤 곳이신가요?</span></div><h2 class="sec-title">계신 곳에 맞는 교육을<br>바로 안내해 드립니다</h2></div>
       </div>
       <div class="who-grid">
-        <a class="who" href="./#ai"><small>초·중·고</small><h3>학교 선생님</h3><ul><li>AI 원리 · 활용 체험</li><li>코딩 · 피지컬 컴퓨팅</li><li>진로 탐색 수업</li></ul><span class="go">학생 교육 보기 →</span></a>
-        <a class="who" href="./#sw"><small>대학 · 교육기관</small><h3>대학·기관 담당자</h3><ul><li>생성형 AI 활용 실습</li><li>프로젝트형 SW 과정</li><li>취업 · 역량 설계</li></ul><span class="go">대학·기관 교육 보기 →</span></a>
-        <a class="who" href="./#ai"><small>기업 · 조직</small><h3>기업 교육 담당자</h3><ul><li>업무에 쓰는 AI 활용</li><li>업무 자동화 기초</li><li>팀 단위 워크숍</li></ul><span class="go">기업 교육 보기 →</span></a>
-        <a class="who" href="./#career"><small>지자체 · 공공기관</small><h3>공공기관 담당자</h3><ul><li>주민 · 청소년 대상 교육</li><li>위탁 · 협약 교육사업</li><li>공무원 AI 연수</li></ul><span class="go">공공 교육 문의 →</span></a>
+        <a class="who" href="curriculum.html"><small>초·중·고</small><h3>학교 선생님</h3><ul><li>AI 원리 · 활용 체험</li><li>코딩 · 피지컬 컴퓨팅</li><li>진로 탐색 수업</li></ul><span class="go">학교 수업 보기 →</span></a>
+        <a class="who" href="curriculum.html?lv=univ"><small>대학 · 교육기관</small><h3>대학·기관 담당자</h3><ul><li>생성형 AI 활용 실습</li><li>프로젝트형 SW 과정</li><li>취업 · 역량 설계</li></ul><span class="go">대학 수업 보기 →</span></a>
+        <a class="who" href="program.html?cat=biz#corp"><small>기업 · 조직</small><h3>기업 교육 담당자</h3><ul><li>업무에 쓰는 AI 활용</li><li>업무 자동화 기초</li><li>팀 단위 워크숍</li></ul><span class="go">기업 교육 보기 →</span></a>
+        <a class="who" href="program.html?cat=biz#public"><small>지자체 · 공공기관</small><h3>공공기관 담당자</h3><ul><li>주민 · 청소년 대상 교육</li><li>위탁 · 협약 교육사업</li><li>공무원 AI 연수</li></ul><span class="go">공공 교육 문의 →</span></a>
       </div>
       <div class="contact-card">
         <div>
@@ -388,6 +376,6 @@
   </section>
 </main>
 
-<footer class="site-footer"><div class="content-wrap"><a class="footer-brand" href="./"><b class="brand-word">beehive</b><span>배움의 가능성을 함께 키웁니다</span></a><div class="footer-links"><a href="about.html">비하이브 소개</a><a href="./#programs">교육 프로그램</a><a href="./#curriculum">커리큘럼</a><a href="./#stories">교육 사례</a></div><small>© BEEHIVE · LEARN, GROW, GO FURTHER</small></div></footer>
+<div id="site-footer"></div>
 </body>
 </html>
