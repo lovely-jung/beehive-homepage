@@ -27,7 +27,7 @@
     var from = viaCat && c.cat !== viaCat ? '<span class="ref">' + esc(catOf(c.cat).name) + ' 수업</span>' : '';
     return '<a class="c-card" href="course.html?id=' + c.id + '">' + from +
       '<span class="fmt">' + (c.format || []).map(function (f) { return '<i>' + esc(f) + '</i>'; }).join('') + '</span>' +
-      '<h3>' + esc(c.title) + '</h3><p>' + esc(c.summary) + '</p>' +
+      '<h3>' + esc(c.title) + (c.apps ? ' <em class="app-tag">교실 앱</em>' : '') + '</h3><p>' + esc(c.summary) + '</p>' +
       '<span class="foot">' + badges(c) + '<span class="go">↗</span></span></a>';
   };
   /* 분야 · 하위 묶음에 속한 수업 (다른 분야에서 함께 보여주는 수업 포함) */
@@ -101,6 +101,13 @@
           }).join('') + '</tr>';
         }).join('') + '</tbody></table></div></section>';
     }
+    if (c.apps && c.apps.length) html += '<section class="sec-block" id="apps"><div class="block-head"><h2>수업에서 쓰는 교실 앱</h2><span>설치 · 로그인 없이 QR로 바로 들어옵니다</span></div><div class="app-grid">' +
+      c.apps.map(function (a) {
+        return '<article class="app-card"><span class="app-kicker">CLASSROOM APP</span><h3>' + esc(a.name) + '</h3><p>' + esc(a.desc) + '</p>' +
+          (a.points ? '<ul>' + a.points.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '') +
+          (a.url ? '<a class="app-go" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(a.urlLabel || '체험해 보기') + ' <span>↗</span></a>' : '<span class="app-status">' + esc(a.status || '수업 때 제공') + '</span>') +
+        '</article>';
+      }).join('') + '</div></section>';
     if (c.safety) html += '<section class="sec-block"><div class="safety"><b>안전 안내 · 수업 시작 전 꼭 함께 확인합니다</b><ul>' + c.safety.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul></div></section>';
 
     var rel = coursesIn(c.cat).filter(function (x) { return x.id !== c.id; }).slice(0, 3);
