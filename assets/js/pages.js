@@ -115,6 +115,26 @@
     html += '</div>' + cta('이 수업을 우리 학교 · 기관에 맞게', '대상, 인원, 시간을 알려주시면 차시와 활동을 맞춰 운영안을 보내드립니다.');
     root.innerHTML = html;
 
+    function planHtml(id, k) {
+      var P = (window.BH_PLANS || {})[id], list = P && P[k];
+      if (!list || !list.length) return '';
+      var byLesson = list.every(function (s) { return /^\d+(~\d+)?차시/.test(s.title); });
+      return '<div class="plan"><div class="plan-head"><h3>' + (byLesson ? '차시별 수업안' : '단계별 운영안') + '</h3><span>' + (byLesson ? '' : list.length + '개 구성 · ') + '단계별 시간과 활동</span></div>' +
+        list.map(function (s, i) {
+          return '<details class="plan-item"' + (i === 0 ? ' open' : '') + '><summary><b>' + esc(s.title) + '</b><span>' + s.min + '분</span></summary>' +
+            '<div class="plan-body">' +
+              '<p class="plan-hook"><em>여는 장치</em>' + esc(s.hook) + '</p>' +
+              '<p class="plan-aim"><em>차시 목표</em>' + esc(s.aim) + '</p>' +
+              '<table class="plan-flow"><thead><tr><th>단계</th><th>시간</th><th>활동</th></tr></thead><tbody>' +
+                s.flow.map(function (f) { return '<tr><th>' + esc(f[0]) + '</th><td class="m">' + f[1] + '분</td><td>' + esc(f[2]) + '</td></tr>'; }).join('') +
+              '</tbody></table>' +
+              '<dl class="plan-more">' +
+                '<div><dt>핵심 발문</dt><dd>' + esc(s.ask) + '</dd></div>' +
+                '<div><dt>시간이 남으면</dt><dd>' + esc(s.extra) + '</dd></div>' +
+                '<div><dt>차시 산출물</dt><dd>' + esc(s.out) + '</dd></div>' +
+              '</dl></div></details>';
+        }).join('') + '</div>';
+    }
     var panel = document.getElementById('lvPanel');
     function show(k) {
       var L = c.levels[k];
@@ -126,7 +146,7 @@
           '<div><dt>사용 도구</dt><dd>' + esc(L.tools) + '</dd></div>' +
           '<div><dt>결과물</dt><dd>' + esc(L.output) + '</dd></div>' +
           '<div><dt>교과 · 생기부 연계</dt><dd>' + esc(L.link) + '</dd></div>' +
-        '</dl></div></div>';
+        '</dl></div></div>' + planHtml(c.id, k);
       root.querySelectorAll('.lv-tabs button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-lv') === k); });
     }
     root.querySelectorAll('.lv-tabs button').forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-lv')); }); });
