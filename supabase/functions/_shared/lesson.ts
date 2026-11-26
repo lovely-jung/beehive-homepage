@@ -60,68 +60,111 @@ function fitSessions(base: PlanStep[], n: number): { steps: PlanStep[][]; note: 
 
 const lv = (cat: Catalog, k: string) => cat.levels[k]?.label ?? k;
 
-export function lessonPlanMd(r: ReqForPlan, cat: Catalog, revisionVersion: number, notes: RevisionNote[]): string {
+/** 교안 구조 데이터: 수업 슬라이드(PPT)와 교사용 지도안이 모두 이 데이터로 만들어집니다 */
+export type PlanSession = {
+  no: number; title: string; min: number;
+  hook: string; aim: string; flow: [string, number, string][]; ask: string; extra: string; out: string;
+  feedback: string[];   // 이 차시에 반영된 현장 피드백 (교사용)
+  generated?: boolean;  // 기본 수업안에 없어 덧붙인 심화 · 발표 차시
+};
+export type PlanData = {
+  courseId: string; courseTitle: string; summary: string; org: string; level: string; levelLabel: string;
+  sessions: number; minutes: number; classes: number | null; headcount: number | null; dates: string | null; location: string | null;
+  goal: string; tools: string; prep: string; output: string; link: string; safety: string[]; requestNotes: string | null;
+  version: number; feedbackRounds: number; generalFeedback: string[]; fitNote: string; items: PlanSession[];
+};
+
+const fb = (n: RevisionNote) => n.text + (n.count && n.count > 1 ? ` (강사 ${n.count}명 의견)` : "");
+
+export function buildPlan(r: ReqForPlan, cat: Catalog, revisionVersion: number, notes: RevisionNote[]): PlanData {
   const course = cat.courses.find((c) => c.id === r.course_id);
   if (!course) throw new Error("수업을 찾을 수 없습니다");
   const L = course.levels[r.level] ?? Object.values(course.levels)[0];
   const base = cat.plans[r.course_id]?.[r.level] ?? [];
   const { steps, note } = fitSessions(base, r.sessions);
-  const general = notes.filter((n) => !n.session);
-  const bySession = (k: number) => notes.filter((n) => n.session === k);
-  const lines: string[] = [
-    `# ${course.title} 교안`,
-    `${r.org_name} · ${lv(cat, r.level)}${r.class_count ? ` ${r.class_count}학급` : ""}${r.headcount ? ` · ${r.headcount}명` : ""} · ${r.sessions}차시 × ${r.minutes_per_session}분`,
-    "",
-    `> 교안 버전 v${revisionVersion + 1}${revisionVersion ? ` · 현장 피드백 ${revisionVersion}회 반영` : " · 기본 수업안"}`,
-    "",
-    "## 수업 개요",
-    "| 항목 | 내용 |", "| --- | --- |",
-    `| 학습 목표 | ${L.goal} |`,
-    `| 사용 도구 | ${L.tools} |`,
-    `| 준비 사항 | ${course.prep || "사전 협의"} |`,
-    `| 최종 결과물 | ${L.output} |`,
-    `| 교과 연계 | ${L.link} |`,
-    `| 일정 · 장소 | ${r.preferred_dates || "협의"} · ${r.location || "협의"} |`,
-  ];
-  if (r.notes) lines.push("", "## 학교 요청 사항", `- ${r.notes}`, "- 위 요청을 수업 전 담당 선생님과 한 번 더 확인하고 활동에 반영해 주세요.");
-  if (course.safety?.length) lines.push("", "## 안전 수칙", ...course.safety.map((s) => `- ${s}`));
-  if (general.length) lines.push("", "## 이전 수업 현장 피드백 (전체)", ...general.map((n) => `- ${n.text}${n.count && n.count > 1 ? ` (강사 ${n.count}명 의견)` : ""}`));
-  if (note) lines.push("", "## 차시 구성 안내", `- ${note}`);
+  const bySession = (k: number) => notes.filter((n) => n.session === k).map(fb);
+  const M = r.minutes_per_session;
+  const items: PlanSession[] = [];
 
-  lines.push("", "## 차시별 수업안");
   if (!steps.length) {
-    // 차시별 수업안 데이터가 없는 수업: 수업 흐름(steps)을 차시에 나눠 담음
+    // 차시별 수업안이 없는 수업: 수업 흐름(steps)을 차시에 나눠 담고, 도입 · 정리를 붙여 한 차시 흐름을 만듦
     const flow = L.steps ?? [];
     for (let i = 0; i < r.sessions; i++) {
       const acts = flow.filter((_, j) => Math.floor((j * r.sessions) / Math.max(flow.length, 1)) === i);
-      lines.push("", `### ${i + 1}차시 (${r.minutes_per_session}분)`, ...(acts.length ? acts : ["앞 차시 활동 심화 실습 · 결과 발표"]).map((a) => `- ${a}`));
-      bySession(i + 1).forEach((n) => lines.push(`- **현장 피드백 반영:** ${n.text}`));
+      const main = acts.length ? acts : ["앞 차시 활동을 확장한 심화 실습", "모둠별 결과 발표"];
+      const body = Math.max(10, M - 15), each = Math.max(5, Math.round(body / main.length));
+      // "활동 이름 — 설명" 형식이면 나눠 쓰고, 설명이 없으면 이름을 본문으로
+      const split = (t: string): [string, string | null] => { const m = t.split(/\s[—–-]\s/); return m.length > 1 ? [m[0].trim(), m.slice(1).join(" — ").trim()] : [t.trim(), null]; };
+      const names = main.map((x) => split(x)[0]);
+      items.push({
+        no: i + 1, min: M, title: names[0], generated: !acts.length,
+        hook: "", aim: acts.length ? `오늘은 ${names.join(", ")}까지 해 봅니다` : "지금까지 만든 결과물을 다듬고 친구들에게 발표합니다",
+        flow: [["도입", 5, i === 0 ? `오늘 만들 것: ${L.output}` : "지난 시간에 만든 것 다시 보기"],
+          ...main.map((x, k) => { const [n, d] = split(x); return (d ? [n, each, d] : [`활동 ${k + 1}`, each, n]) as [string, number, string]; }),
+          ["정리", 10, "오늘 만든 것 공유하고, 배운 점 한 줄 쓰기"]],
+        ask: "", extra: "", out: i === r.sessions - 1 ? L.output : "", feedback: bySession(i + 1),
+      });
     }
   } else {
     steps.forEach((group, i) => {
       const k = i + 1;
       if (!group.length) {
-        lines.push("", `### ${k}차시 심화 실습 · 결과 발표 (${r.minutes_per_session}분)`,
-          "| 단계 | 시간 | 활동 |", "| --- | --- | --- |",
-          `| 도입 | 5분 | 지난 차시 결과물을 다시 열어 보완할 점 한 가지씩 정하기 |`,
-          `| 심화 실습 | ${Math.max(10, r.minutes_per_session - 20)}분 | 앞 차시 활동을 조건을 바꿔 확장 (난이도 · 주제 · 협업 범위) |`,
-          `| 발표 | 10분 | 모둠별 결과물 발표와 질문 한 가지씩 |`, `| 정리 | 5분 | 배운 점과 다음에 해 보고 싶은 것 기록 |`);
-      } else {
-        group.forEach((s, j) => {
-          const scale = r.minutes_per_session / (group.reduce((t, x) => t + x.min, 0) || r.minutes_per_session);
-          lines.push("", `### ${k}차시${group.length > 1 ? `-${j + 1}` : ""} ${s.title.replace(/^\d+(~\d+)?차시\s*/, "")} (${Math.round(s.min * scale)}분)`,
-            `- **여는 장치:** ${s.hook}`, `- **차시 목표:** ${s.aim}`, "",
-            "| 단계 | 시간 | 활동 |", "| --- | --- | --- |",
-            ...s.flow.map((f) => `| ${f[0]} | ${Math.max(1, Math.round(f[1] * scale))}분 | ${f[2]} |`),
-            "", `- **핵심 발문:** ${s.ask}`, `- **시간이 남으면:** ${s.extra}`, `- **차시 산출물:** ${s.out}`);
-        });
+        items.push({ no: k, min: M, title: "심화 실습 · 결과 발표", generated: true,
+          hook: "지난 차시 결과물을 다시 열어, 조건 하나를 바꾸면 무엇이 달라질지 예측하게 합니다.",
+          aim: "앞 차시 결과물을 한 단계 발전시키고, 과정과 결과를 친구들에게 설명한다.",
+          flow: [["도입", 5, "지난 차시 결과물 다시 보기, 보완할 점 한 가지씩 정하기"], ["심화 실습", Math.max(10, M - 20), "조건을 바꿔 확장하기 (난이도 · 주제 · 협업 범위)"],
+            ["발표", 10, "모둠별 결과물 발표와 질문 한 가지씩"], ["정리", 5, "배운 점과 다음에 해 보고 싶은 것 기록"]],
+          ask: "처음 만든 것과 지금 만든 것은 무엇이 달라졌나요?", extra: "다른 모둠 결과물에 아이디어 스티커 붙이기", out: "발전시킨 결과물 + 발표", feedback: bySession(k) });
+        return;
       }
-      bySession(k).forEach((n) => lines.push(`- **현장 피드백 반영:** ${n.text}${n.count && n.count > 1 ? ` (강사 ${n.count}명 의견)` : ""}`));
+      const total = group.reduce((t, x) => t + x.min, 0) || M, scale = M / total;
+      group.forEach((s, j) => items.push({
+        no: k, title: s.title.replace(/^\d+(~\d+)?차시\s*/, "") + (group.length > 1 ? ` (${j + 1}/${group.length})` : ""),
+        min: Math.round(s.min * scale), hook: s.hook, aim: s.aim,
+        flow: s.flow.map((f) => [f[0], Math.max(1, Math.round(f[1] * scale)), f[2]] as [string, number, string]),
+        ask: s.ask, extra: s.extra, out: s.out, feedback: j === 0 ? bySession(k) : [],
+      }));
     });
   }
-  lines.push("", "## 수업 후", "- 수업이 끝나면 강사 화면의 **결과 보고서**에 교안이 현장에 맞았는지, 어느 차시를 어떻게 고치면 좋을지 남겨 주세요.",
-    "- 보내 주신 의견은 검토 후 다음 교안에 반영됩니다.");
+  return {
+    courseId: course.id, courseTitle: course.title, summary: course.summary, org: r.org_name, level: r.level, levelLabel: lv(cat, r.level),
+    sessions: r.sessions, minutes: M, classes: r.class_count, headcount: r.headcount, dates: r.preferred_dates, location: r.location,
+    goal: L.goal, tools: L.tools, prep: course.prep || "사전 협의", output: L.output, link: L.link, safety: course.safety ?? [], requestNotes: r.notes,
+    version: revisionVersion + 1, feedbackRounds: revisionVersion, generalFeedback: notes.filter((n) => !n.session).map(fb), fitNote: note, items,
+  };
+}
+
+/** 교사용 지도안 (마크다운) */
+export function planToMd(d: PlanData): string {
+  const lines: string[] = [
+    `# ${d.courseTitle} 교사용 지도안`,
+    `${d.org} · ${d.levelLabel}${d.classes ? ` ${d.classes}학급` : ""}${d.headcount ? ` · ${d.headcount}명` : ""} · ${d.sessions}차시 × ${d.minutes}분`,
+    "", `> 교안 버전 v${d.version}${d.feedbackRounds ? ` · 현장 피드백 ${d.feedbackRounds}회 반영` : " · 기본 수업안"}`,
+    "", "## 수업 개요", "| 항목 | 내용 |", "| --- | --- |",
+    `| 학습 목표 | ${d.goal} |`, `| 사용 도구 | ${d.tools} |`, `| 준비 사항 | ${d.prep} |`, `| 최종 결과물 | ${d.output} |`, `| 교과 연계 | ${d.link} |`,
+    `| 일정 · 장소 | ${d.dates || "협의"} · ${d.location || "협의"} |`,
+  ];
+  if (d.requestNotes) lines.push("", "## 학교 요청 사항", `- ${d.requestNotes}`, "- 수업 전 담당 선생님과 한 번 더 확인하고 활동에 반영해 주세요.");
+  if (d.safety.length) lines.push("", "## 안전 수칙", ...d.safety.map((s) => `- ${s}`));
+  if (d.generalFeedback.length) lines.push("", "## 이전 수업 현장 피드백 (전체)", ...d.generalFeedback.map((t) => `- ${t}`));
+  if (d.fitNote) lines.push("", "## 차시 구성 안내", `- ${d.fitNote}`);
+  lines.push("", "## 차시별 지도 계획");
+  for (const s of d.items) {
+    lines.push("", `### ${s.no}차시 ${s.title} (${s.min}분)`);
+    if (s.hook) lines.push(`- **여는 장치:** ${s.hook}`);
+    if (s.aim) lines.push(`- **차시 목표:** ${s.aim}`);
+    lines.push("", "| 단계 | 시간 | 활동 |", "| --- | --- | --- |", ...s.flow.map((f) => `| ${f[0]} | ${f[1]}분 | ${f[2]} |`), "");
+    if (s.ask) lines.push(`- **핵심 발문:** ${s.ask}`);
+    if (s.extra) lines.push(`- **시간이 남으면:** ${s.extra}`);
+    if (s.out) lines.push(`- **차시 산출물:** ${s.out}`);
+    s.feedback.forEach((t) => lines.push(`- **현장 피드백 반영:** ${t}`));
+  }
+  lines.push("", "## 수업 후", "- 수업이 끝나면 강사 화면의 **결과 보고서**에 교안이 현장에 맞았는지, 어느 차시를 어떻게 고치면 좋을지 남겨 주세요.");
   return lines.join("\n");
+}
+
+export function lessonPlanMd(r: ReqForPlan, cat: Catalog, revisionVersion: number, notes: RevisionNote[]): string {
+  return planToMd(buildPlan(r, cat, revisionVersion, notes));
 }
 
 /* =========================================================
