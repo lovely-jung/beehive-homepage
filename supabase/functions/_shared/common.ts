@@ -42,7 +42,9 @@ export type Course = { id: string; cat: string; sub: string; title: string; summ
 export type QuoteLine = { item: string; detail: string; amount: number };
 export type Quote = { lines: QuoteLine[]; total: number; classes: number; vatNote: string; travelNote: string; soleContract: boolean };
 export type QuoteFn = (course: Course, level: string, sessions: number, minutes: number, classes: number | null, headcount: number | null) => Quote | null;
-export type Catalog = { courses: Course[]; levels: Record<string, { label: string }>; cats: { id: string; name: string; full: string }[]; quote: QuoteFn | null };
+export type PlanStep = { title: string; min: number; hook: string; aim: string; flow: [string, number, string][]; ask: string; extra: string; out: string };
+export type Catalog = { courses: Course[]; levels: Record<string, { label: string }>; cats: { id: string; name: string; full: string }[]; quote: QuoteFn | null;
+  plans: Record<string, Record<string, PlanStep[]>> };
 
 let cache: { at: number; data: Catalog } | null = null;
 export async function catalog(): Promise<Catalog> {
@@ -58,8 +60,14 @@ export async function catalog(): Promise<Catalog> {
     const pr = await fetch(`${SITE_URL}/assets/data/pricing.js?t=${Date.now()}`);
     if (pr.ok) new Function("window", await pr.text())(win);
   } catch { /* 견적 생략 */ }
+  // 차시별 수업안 (교안 생성에 사용)
+  try {
+    const pl = await fetch(`${SITE_URL}/assets/data/plans.js?t=${Date.now()}`);
+    if (pl.ok) new Function("window", await pl.text())(win);
+  } catch { /* 수업안 없이 진행 */ }
   const qf = typeof win.BH_QUOTE === "function" ? (win.BH_QUOTE as QuoteFn).bind(win) : null;
-  const data: Catalog = { courses: win.BH_COURSES as Course[], levels: win.BH_LEVELS as Catalog["levels"], cats: win.BH_CATEGORIES as Catalog["cats"], quote: qf };
+  const data: Catalog = { courses: win.BH_COURSES as Course[], levels: win.BH_LEVELS as Catalog["levels"], cats: win.BH_CATEGORIES as Catalog["cats"], quote: qf,
+    plans: (win.BH_PLANS ?? {}) as Catalog["plans"] };
   if (!Array.isArray(data.courses)) throw new Error("수업 데이터 형식이 올바르지 않습니다");
   cache = { at: Date.now(), data };
   return data;
@@ -106,4 +114,43 @@ export function mdToHtml(md: string): string {
     i++;
   }
   return out.join("\n");
+}
+
+/* ---------- 로그인한 사용자 확인 ---------- */
+export async function whoAmI(req: Request, db: SupabaseClient): Promise<{ id: string; email: string; role: string } | null> {
+  const jwt = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+  if (!jwt) return null;
+  const { data: u } = await db.auth.getUser(jwt);
+  if (!u?.user) return null;
+  const prof = await db.from("profiles").select("role").eq("id", u.user.id).maybeSingle();
+  return { id: u.user.id, email: u.user.email ?? "", role: prof.data?.role ?? "" };
+}
+
+/* ---------- 메일 발송 (Resend) ----------
+   RESEND_API_KEY 와 MAIL_FROM 이 모두 설정되어 있을 때만 실제로 보내고, 없으면 { error: "preview" } */
+export async function sendMail(to: string, subject: string, html: string): Promise<{ ok: boolean; id?: string; error?: string }> {
+  const key = Deno.env.get("RESEND_API_KEY") ?? "", from = Deno.env.get("MAIL_FROM") ?? "", replyTo = Deno.env.get("MAIL_REPLY_TO") ?? "";
+  if (!key || !from) return { ok: false, error: "preview" };
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+    body: JSON.stringify({ from, to: [to], subject, html, ...(replyTo ? { reply_to: replyTo } : {}) }),
+  });
+  const out = await res.json().catch(() => ({}));
+  return res.ok ? { ok: true, id: out.id } : { ok: false, error: String(out.message ?? res.status) };
+}
+
+/** 메일을 보낼 메일함(email_outbox)에 남기고, 설정이 있으면 실제로 발송 */
+export async function queueMail(db: SupabaseClient, requestId: string | null, to: string, subject: string, html: string) {
+  const ob = await db.from("email_outbox").insert({ request_id: requestId, to_email: to, subject, body_html: html, status: "preview" }).select("id").single();
+  const sent = await sendMail(to, subject, html);
+  if (sent.ok) await db.from("email_outbox").update({ status: "sent", sent_at: new Date().toISOString(), provider_id: sent.id }).eq("id", ob.data!.id);
+  else if (sent.error !== "preview") await db.from("email_outbox").update({ status: "failed", error: sent.error }).eq("id", ob.data!.id);
+  return { outbox_id: ob.data?.id as string | undefined, mail: sent.ok ? "sent" : sent.error === "preview" ? "preview" : "failed", mail_error: sent.ok ? undefined : sent.error };
+}
+
+/** 메일 공통 틀 */
+export function mailFrame(inner: string): string {
+  return `<div style="max-width:640px;margin:0 auto;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#26241f">
+  <p style="font-size:20px;font-weight:800;margin:0 0 18px">beehive<span style="color:#e9822d">.</span></p>${inner}</div>`;
 }

@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>강사 화면 | 비하이브</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+:root{--ink:#26241f;--soft:#77736d;--line:#e8e4dc;--paper:#f6f4ef;--orange:#e9822d;--green:#4f7a45;--red:#b23b25}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;font-family:"Noto Sans KR",system-ui,sans-serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+.top{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:16px;height:60px;padding:0 22px;background:#fff;border-bottom:1px solid var(--line)}
+.top b{font-size:19px;letter-spacing:-.04em}.top b i{font-style:normal;color:var(--orange)}
+.top .r{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--soft)}
+.top button{padding:7px 14px;border:1px solid var(--line);border-radius:99px;background:#fff;font-size:13px}
+.bell{position:relative}.bell em{position:absolute;top:-6px;right:-6px;min-width:18px;padding:0 5px;border-radius:99px;background:var(--orange);color:#fff;font-size:11px;font-style:normal;line-height:18px;text-align:center}
+.login{max-width:380px;margin:12vh auto;padding:32px;border-radius:20px;background:#fff;border:1px solid var(--line)}
+.login h1{margin:0 0 6px;font-size:22px}.login p{margin:0 0 20px;font-size:13.5px;color:var(--soft)}
+.login label{display:block;margin:12px 0 6px;font-size:13px;font-weight:700}
+.login input{width:100%;padding:12px 13px;border:1px solid #ddd6ca;border-radius:10px;font:15px inherit}
+.login button[type=submit]{width:100%;margin-top:20px;padding:13px;border:0;border-radius:99px;background:var(--ink);color:#fff;font-weight:700}
+.msg{margin-top:12px;font-size:13px;color:var(--red)}
+.wrap{display:grid;grid-template-columns:340px minmax(0,1fr);min-height:calc(100vh - 60px)}
+.list{border-right:1px solid var(--line);background:#fff}
+.list h2{margin:0;padding:18px 18px 10px;font-size:14px;color:var(--soft)}
+.item{display:block;width:100%;padding:14px 18px;border:0;border-bottom:1px solid #f0ede7;background:#fff;text-align:left}
+.item:hover{background:#faf8f4}.item[aria-current="true"]{background:#fff6ec}
+.item b{display:block;font-size:14.5px}.item small{display:block;margin-top:4px;font-size:12.5px;color:var(--soft)}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:700;background:#eee;color:#555;vertical-align:1px}
+.b-assigned{background:#fff1df;color:#9a5a1c}.b-plan_ready{background:#e8edfb;color:#2d48a8}.b-completed{background:#e6f1e2;color:var(--green)}
+.detail{padding:26px 30px 70px;min-width:0}
+.empty{color:var(--soft);font-size:14px;padding:30px 0}
+.card{margin-bottom:16px;padding:22px 24px;border-radius:16px;background:#fff;border:1px solid var(--line)}
+.card h2{margin:0 0 14px;font-size:18px;letter-spacing:-.03em;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.kv{display:grid;grid-template-columns:100px 1fr;gap:8px 14px;margin:0;font-size:14px}
+.kv dt{color:var(--soft)}.kv dd{margin:0;word-break:keep-all}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{padding:10px 18px;border:1px solid var(--line);border-radius:99px;background:#fff;font-size:13.5px;font-weight:700;color:var(--ink);text-decoration:none}
+.btn.main{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn:disabled{opacity:.5;cursor:wait}
+.note{margin:10px 0 0;font-size:12.5px;color:var(--soft);line-height:1.6}
+.doc{margin-top:16px;padding:22px 26px;border:1px solid var(--line);border-radius:14px;max-height:640px;overflow:auto;font-size:14px;line-height:1.7}
+.doc h1{font-size:22px;margin:0 0 6px}.doc h2{font-size:17px;margin:24px 0 8px}.doc h3{font-size:15px;margin:20px 0 6px;color:#9a5a1c}
+.doc table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13.5px}
+.doc th,.doc td{padding:7px 9px;border:1px solid #e6e1d8;text-align:left;vertical-align:top}.doc tr:first-child th{background:#f5f2ec}
+.doc blockquote{margin:8px 0;padding:8px 14px;border-left:3px solid var(--orange);background:#fff6ec;color:#7a5a3c}
+.doc ul{padding-left:20px;margin:6px 0}
+details.prop summary{cursor:pointer;font-size:13.5px;font-weight:700;color:var(--soft)}
+.f{display:grid;gap:6px;margin-top:14px}
+.f>label,.f>span{font-size:13px;font-weight:700}
+.f input,.f textarea,.f select{width:100%;padding:10px 12px;border:1px solid #ddd6ca;border-radius:10px;font:14px inherit;background:#fff}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rate{display:flex;gap:6px;flex-wrap:wrap}
+.rate label{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border:1px solid #ddd6ca;border-radius:99px;font-size:13.5px;cursor:pointer}
+.rate input{position:absolute;opacity:0}
+.rate label:has(input:checked){background:var(--ink);border-color:var(--ink);color:#fff}
+.imp{display:grid;grid-template-columns:110px 1fr 1fr 34px;gap:8px;align-items:start;margin-top:8px}
+.imp button{height:40px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.notis{margin-bottom:16px}
+.noti{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 16px;margin-bottom:8px;border-radius:12px;background:#fff6ec;border:1px solid #f1d9b5;font-size:13.5px}
+.noti b{display:block}.noti small{color:#7a5a3c}
+.toast{position:fixed;right:20px;bottom:20px;max-width:380px;padding:13px 18px;border-radius:12px;background:var(--ink);color:#fff;font-size:13.5px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
+.toast.on{opacity:1}.toast.bad{background:var(--red)}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}.list{border-right:0;border-bottom:1px solid var(--line)}.detail{padding:20px 16px 60px}.g2{grid-template-columns:1fr}.imp{grid-template-columns:1fr 34px}.imp input{grid-column:1}}
+@media print{.top,.list,.notis,.noprint{display:none!important}.wrap{display:block}.detail{padding:0}.card{border:0;padding:0}.doc{max-height:none;overflow:visible;border:0;padding:0}}
+</style>
+</head>
+<body>
+<header class="top"><b>beehive<i>.</i> 강사</b><span class="r" id="who"></span></header>
+
+<section class="login" id="login" hidden>
+  <h1>강사 로그인</h1>
+  <p>배정된 수업 확인, AI 교안 만들기, 결과 보고를 하는 화면입니다.</p>
+  <form id="loginForm">
+    <label for="em">이메일</label><input id="em" type="email" autocomplete="username" required>
+    <label for="pw">비밀번호</label><input id="pw" type="password" autocomplete="current-password" required>
+    <button type="submit">로그인</button>
+    <div class="msg" id="loginMsg" role="alert"></div>
+    <p style="margin:14px 0 0;text-align:center"><button type="button" id="forgot" style="border:0;background:none;color:#77736d;font-size:13px;text-decoration:underline">비밀번호를 잊으셨나요?</button></p>
+  </form>
+</section>
+
+<section class="login" id="setpw" hidden>
+  <h1>비밀번호 정하기</h1>
+  <p>강사 화면에 로그인할 비밀번호를 정해 주세요. (8자 이상)</p>
+  <form id="pwForm">
+    <label for="pw1">새 비밀번호</label><input id="pw1" type="password" autocomplete="new-password" minlength="8" required>
+    <label for="pw2">한 번 더</label><input id="pw2" type="password" autocomplete="new-password" minlength="8" required>
+    <button type="submit">비밀번호 저장</button>
+    <div class="msg" id="pwMsg" role="alert"></div>
+  </form>
+</section>
+
+<div class="wrap" id="app" hidden>
+  <aside class="list"><h2>내 수업</h2><div id="items"></div></aside>
+  <main class="detail"><div class="notis" id="notis"></div><div id="detail"><p class="empty">왼쪽에서 수업을 골라 주세요.</p></div></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="assets/js/supabase-config.js"></script>
+<script src="assets/data/courses.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(function () {
+  var linkType = (location.hash.match(/type=(invite|recovery)/) || [])[1] || null;
+  var wantA = (location.hash.match(/a=([0-9a-f-]{36})/) || [])[1] || null;
+  var CFG = window.BH_SUPABASE, sb = window.supabase.createClient(CFG.url, CFG.key);
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); };
+  var when = function (t) { return t ? new Date(t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; };
+  var newKey = function () { return (crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random().toString(36).slice(2)) + '-ins'; };
+  var LV = { elem: '초등', mid: '중등', high: '고등', univ: '대학', adult: '교원' };
+  var AST = { assigned: '새 배정', plan_ready: '교안 준비됨', completed: '수업 완료', cancelled: '취소' };
+  var C = window.BH_COURSES || [];
+  var title = function (id) { var c = C.filter(function (x) { return x.id === id; })[0]; return c ? c.title : id; };
+  var me = null, rows = [], current = null;
+
+  function toast(m, bad) { var t = $('toast'); t.textContent = m; t.className = 'toast on' + (bad ? ' bad' : ''); clearTimeout(t._h); t._h = setTimeout(function () { t.className = 'toast'; }, 3800); }
+
+  /* 교안 마크다운 → HTML (제목, 인용, 목록, 표, 굵게) */
+  function md2html(md) {
+    var inline = function (t) { return esc(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); };
+    var L = md.replace(/\r/g, '').split('\n'), out = [], i = 0;
+    while (i < L.length) {
+      var l = L[i];
+      if (/^#{1,3} /.test(l)) { var n = l.match(/^#+/)[0].length; out.push('<h' + n + '>' + inline(l.replace(/^#+ /, '')) + '</h' + n + '>'); i++; continue; }
+      if (/^> /.test(l)) { out.push('<blockquote>' + inline(l.slice(2)) + '</blockquote>'); i++; continue; }
+      if (/^\|/.test(l)) {
+        var rs = [];
+        while (i < L.length && /^\|/.test(L[i])) { if (!/^\|\s*-/.test(L[i])) rs.push(L[i].replace(/^\||\|$/g, '').split('|').map(function (c) { return c.trim(); })); i++; }
+        out.push('<table>' + rs.map(function (r, ri) { return '<tr>' + r.map(function (c) { return ri === 0 ? '<th>' + inline(c) + '</th>' : '<td>' + inline(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>'); continue;
+      }
+      if (/^[-*] /.test(l)) { var it = []; while (i < L.length && /^[-*] /.test(L[i])) { it.push('<li>' + inline(L[i].slice(2)) + '</li>'); i++; } out.push('<ul>' + it.join('') + '</ul>'); continue; }
+      if (!l.trim()) { i++; continue; }
+      out.push('<p>' + inline(l) + '</p>'); i++;
+    }
+    return out.join('\n');
+  }
+
+  /* ---------- 로그인 ---------- */
+  async function boot() {
+    var s = (await sb.auth.getSession()).data.session;
+    if (s && linkType) { $('login').hidden = true; $('app').hidden = true; $('setpw').hidden = false; return; }
+    if (!s) { $('login').hidden = false; $('app').hidden = true; $('who').textContent = ''; return; }
+    var p = await sb.from('profiles').select('role, name').eq('id', s.user.id).maybeSingle();
+    if (!p.data || (p.data.role !== 'instructor' && p.data.role !== 'admin')) { await sb.auth.signOut(); $('login').hidden = false; $('loginMsg').textContent = '강사 계정이 아닙니다.'; return; }
+    me = s.user.id;
+    $('login').hidden = true; $('setpw').hidden = true; $('app').hidden = false;
+    $('who').innerHTML = '<span class="bell">알림<em id="bell" hidden></em></span> · ' + esc(p.data.name || s.user.email) + ' 강사님 <button type="button" id="logout">로그아웃</button>';
+    $('logout').onclick = async function () { await sb.auth.signOut(); location.reload(); };
+    await load(); notis();
+    if (wantA) open(wantA); else if (rows.length && innerWidth > 900) open(rows[0].id);
+  }
+  $('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); $('loginMsg').textContent = '';
+    var r = await sb.auth.signInWithPassword({ email: $('em').value.trim(), password: $('pw').value });
+    if (r.error) { $('loginMsg').textContent = '이메일 또는 비밀번호를 확인해 주세요.'; return; }
+    boot();
+  });
+  $('pwForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); $('pwMsg').textContent = '';
+    if ($('pw1').value !== $('pw2').value) { $('pwMsg').textContent = '두 비밀번호가 다릅니다.'; return; }
+    var r = await sb.auth.updateUser({ password: $('pw1').value });
+    if (r.error) { $('pwMsg').textContent = '저장하지 못했습니다: ' + r.error.message; return; }
+    linkType = null; history.replaceState(null, '', location.pathname); toast('비밀번호를 저장했습니다.'); boot();
+  });
+  $('forgot').addEventListener('click', async function () {
+    var em = $('em').value.trim();
+    if (!em) { $('loginMsg').textContent = '이메일을 먼저 입력해 주세요.'; return; }
+    await sb.auth.resetPasswordForEmail(em, { redirectTo: location.origin + location.pathname });
+    $('loginMsg').style.color = '#4f7a45'; $('loginMsg').textContent = '가입된 주소라면 비밀번호 재설정 메일을 보냈습니다.';
+  });
+
+  /* ---------- 알림 ---------- */
+  async function notis() {
+    var n = (await sb.from('notifications').select('*').eq('user_id', me).is('read_at', null).order('created_at', { ascending: false }).limit(10)).data || [];
+    $('bell').hidden = !n.length; $('bell').textContent = n.length;
+    $('notis').innerHTML = n.map(function (x) {
+      var a = (x.link || '').match(/a=([0-9a-f-]{36})/);
+      return '<div class="noti"><div><b>' + esc(x.title) + '</b><small>' + esc(x.body || '') + ' · ' + when(x.created_at) + '</small></div>' +
+        '<button class="btn" data-read="' + x.id + '"' + (a ? ' data-go="' + a[1] + '"' : '') + '>' + (a ? '확인하기' : '확인') + '</button></div>';
+    }).join('');
+  }
+  $('notis').addEventListener('click', async function (e) {
+    var b = e.target.closest('[data-read]'); if (!b) return;
+    await sb.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', b.dataset.read);
+    if (b.dataset.go) open(b.dataset.go);
+    notis();
+  });
+
+  /* ---------- 내 수업 목록 ---------- */
+  async function load() {
+    var r = await sb.from('assignments').select('*, requests(*)').eq('instructor_id', me).order('assigned_at', { ascending: false });
+    if (r.error) { toast('수업을 불러오지 못했습니다: ' + r.error.message, true); return; }
+    rows = r.data; renderList();
+  }
+  function renderList() {
+    $('items').innerHTML = rows.map(function (a) {
+      var q = a.requests;
+      return '<button type="button" class="item" data-id="' + a.id + '" aria-current="' + (current === a.id) + '"><b>' + esc(q.org_name) + ' <span class="badge b-' + a.status + '">' + AST[a.status] + '</span></b>' +
+        '<small>' + esc(title(q.course_id)) + ' · ' + (LV[q.level] || q.level) + ' · ' + q.sessions + '차시 · ' + esc(q.preferred_dates || '일정 협의') + '</small></button>';
+    }).join('') || '<p class="empty" style="padding:0 18px">아직 배정된 수업이 없습니다. 새 수업이 배정되면 알림으로 알려 드립니다.</p>';
+  }
+  $('items').addEventListener('click', function (e) { var b = e.target.closest('.item'); if (b) open(b.dataset.id); });
+
+  /* ---------- 수업 상세 ---------- */
+  var LP = null;
+  async function open(id) {
+    current = id; renderList();
+    var a = rows.filter(function (x) { return x.id === id; })[0];
+    if (!a) { $('detail').innerHTML = '<p class="empty">이 수업을 찾을 수 없습니다. 배정이 바뀌었을 수 있습니다.</p>'; return; }
+    var q = a.requests;
+    var prop = (await sb.from('proposals').select('content_md').eq('request_id', q.id).eq('status', 'sent').maybeSingle()).data;
+    LP = (await sb.from('lesson_plans').select('*').eq('assignment_id', id).order('version', { ascending: false }).limit(1)).data;
+    LP = LP && LP[0];
+    var rep = (await sb.from('reports').select('*').eq('assignment_id', id).maybeSingle()).data;
+
+    var h = '<div class="card"><h2>' + esc(q.org_name) + ' <span class="badge b-' + a.status + '">' + AST[a.status] + '</span></h2><dl class="kv">' +
+      '<dt>수업</dt><dd>' + esc(title(q.course_id)) + '</dd>' +
+      '<dt>대상</dt><dd>' + (LV[q.level] || q.level) + (q.class_count ? ' · ' + q.class_count + '학급' : '') + (q.headcount ? ' · ' + q.headcount + '명' : '') + '</dd>' +
+      '<dt>구성</dt><dd>' + q.sessions + '차시 × ' + q.minutes_per_session + '분</dd>' +
+      '<dt>일정</dt><dd>' + esc(q.preferred_dates || '협의') + '</dd><dt>장소</dt><dd>' + esc(q.location || '협의') + '</dd>' +
+      '<dt>요청 사항</dt><dd>' + esc(q.notes || '-') + '</dd>' +
+      '<dt>학교 담당</dt><dd>' + esc(q.contact_name) + ' · ' + esc(q.contact_email) + (q.contact_phone ? ' · ' + esc(q.contact_phone) : '') + '</dd>' +
+      '<dt>배정</dt><dd>' + when(a.assigned_at) + '</dd></dl>' +
+      (prop ? '<details class="prop" style="margin-top:14px"><summary>학교에 보낸 제안서 보기</summary><div class="doc">' + md2html(prop.content_md) + '</div></details>' : '') + '</div>';
+
+    // AI 교안
+    h += '<div class="card"><h2>AI 교안' + (LP ? ' <span class="badge b-plan_ready">' + LP.version + '번째 · 교안 v' + (LP.revision_version + 1) + '</span>' : '') + '</h2>' +
+      (LP ? '<div class="btns noprint"><button class="btn main" data-dl="doc">Word로 내려받기</button><button class="btn" data-dl="html">HTML로 내려받기</button><button class="btn" data-dl="print">인쇄 · PDF 저장</button>' +
+          (a.status !== 'completed' ? '<button class="btn" data-act="generate_lesson_plan" data-key="' + newKey() + '">다시 만들기</button>' : '') + '</div>' +
+          '<div class="doc" id="doc">' + md2html(LP.content_md) + '</div>'
+        : '<p class="note" style="margin-top:0">기본 수업안에 이 학교의 차시 · 시간 · 요청 사항과, 이전 수업 강사들의 현장 피드백을 반영해 교안을 만듭니다.</p>' +
+          '<div class="btns"><button class="btn main" data-act="generate_lesson_plan" data-key="' + newKey() + '">AI 교안 생성</button></div>') + '</div>';
+
+    // 결과 보고서
+    var R = rep || {}, imps = (R.improvements && R.improvements.length ? R.improvements : [{}]);
+    var sessOpt = function (v) { var o = '<option value="">전체</option>'; for (var k = 1; k <= q.sessions; k++) o += '<option value="' + k + '"' + (Number(v) === k ? ' selected' : '') + '>' + k + '차시</option>'; return o; };
+    var impRow = function (x) { return '<div class="imp"><select name="session">' + sessOpt(x.session) + '</select><input name="issue" placeholder="무엇이 문제였나요" value="' + esc(x.issue || '') + '"><input name="suggestion" placeholder="어떻게 고치면 좋을까요" value="' + esc(x.suggestion || '') + '"><button type="button" data-delimp aria-label="줄 삭제">×</button></div>'; };
+    var rate = function (name, v) { var o = ''; for (var k = 1; k <= 5; k++) o += '<label><input type="radio" name="' + name + '" value="' + k + '"' + (Number(v) === k ? ' checked' : '') + '>' + k + '점</label>'; return '<div class="rate">' + o + '</div>'; };
+    h += '<div class="card noprint"><h2>수업 결과 보고서' + (rep ? ' <span class="badge b-completed">' + when(rep.submitted_at) + ' 제출</span>' : '') + '</h2>' +
+      (LP || rep ? '' : '<p class="note" style="margin-top:0">수업을 마친 뒤 작성해 주세요. 교안을 먼저 만들어 두시면 차시별로 평가하기 쉽습니다.</p>') +
+      '<form id="repForm">' +
+      '<div class="g2"><div class="f"><label for="r_on">수업한 날</label><input id="r_on" name="taught_on" type="date" value="' + esc(R.taught_on || '') + '"></div>' +
+      '<div class="f"><label for="r_st">참여 학생 수</label><input id="r_st" name="students" type="number" min="0" max="2000" value="' + (R.students == null ? (q.headcount || '') : R.students) + '"></div></div>' +
+      '<div class="f"><span>수업 전체 만족도 *</span>' + rate('rating_overall', R.rating_overall) + '</div>' +
+      '<div class="f"><span>교안이 현장에 잘 맞았나요? *</span>' + rate('rating_plan', R.rating_plan) + '</div>' +
+      '<div class="f"><label for="r_ww">잘 된 점</label><textarea id="r_ww" name="went_well" rows="2">' + esc(R.went_well || '') + '</textarea></div>' +
+      '<div class="f"><label for="r_sr">학생 반응</label><textarea id="r_sr" name="student_reaction" rows="2">' + esc(R.student_reaction || '') + '</textarea></div>' +
+      '<div class="f"><span>교안에서 고칠 점 (차시별) — 교안 적합도 3점 이하면 필수</span><div id="imps">' + imps.map(impRow).join('') + '</div>' +
+      '<div><button type="button" class="btn" id="addImp" style="margin-top:8px">+ 한 줄 추가</button></div></div>' +
+      '<div class="f"><label for="r_ex">그 밖에 전할 말</label><textarea id="r_ex" name="extra" rows="2">' + esc(R.extra || '') + '</textarea></div>' +
+      '<div class="btns"><button type="button" class="btn dark" data-act="submit_report">' + (rep ? '보고서 수정 제출' : '보고서 제출') + '</button></div>' +
+      '<p class="note">제출한 의견은 관리자가 검토해 같은 수업의 다음 교안에 반영합니다. 반영된 뒤에는 수정할 수 없습니다.</p></form></div>';
+    $('detail').innerHTML = h;
+    $('addImp').onclick = function () { $('imps').insertAdjacentHTML('beforeend', impRow({})); };
+    history.replaceState(null, '', location.pathname + '#a=' + id);
+  }
+
+  /* ---------- 교안 내려받기 ---------- */
+  function download(kind) {
+    var a = rows.filter(function (x) { return x.id === current; })[0], q = a.requests;
+    var name = ('교안_' + q.org_name + '_' + title(q.course_id)).replace(/[\\/:*?"<>|\s]+/g, '_');
+    if (kind === 'print') { window.print(); return; }
+    var css = 'body{font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;line-height:1.7;color:#222;max-width:820px;margin:30px auto;padding:0 20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;vertical-align:top}tr:first-child th{background:#f3efe8}h3{color:#9a5a1c}blockquote{border-left:3px solid #e9822d;margin:8px 0;padding:6px 12px;background:#fff6ec}';
+    var html = '<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>' + esc(name) + '</title><style>' + css + '</style></head><body>' + md2html(LP.content_md) + '</body></html>';
+    var blob = new Blob(['﻿' + html], { type: kind === 'doc' ? 'application/msword' : 'text/html;charset=utf-8' });
+    var u = URL.createObjectURL(blob), el = document.createElement('a');
+    el.href = u; el.download = name + (kind === 'doc' ? '.doc' : '.html'); document.body.appendChild(el); el.click(); el.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 2000);
+  }
+
+  /* ---------- 버튼 동작 ---------- */
+  $('detail').addEventListener('click', async function (e) {
+    if (e.target.closest('[data-delimp]')) { var row = e.target.closest('.imp'); if ($('imps').children.length > 1) row.remove(); else row.querySelectorAll('input').forEach(function (x) { x.value = ''; }); return; }
+    var dl = e.target.closest('[data-dl]'); if (dl) { download(dl.dataset.dl); return; }
+    var b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+    var act = b.dataset.act, body = { action: act, assignment_id: current, key: b.dataset.key || newKey() };
+    if (act === 'generate_lesson_plan' && LP && !confirm('교안을 새로 만들까요? 이전 교안은 기록으로 남습니다.')) return;
+    if (act === 'submit_report') {
+      var f = $('repForm'), fd = new FormData(f);
+      body.report = { taught_on: fd.get('taught_on'), students: fd.get('students'), rating_overall: fd.get('rating_overall'), rating_plan: fd.get('rating_plan'),
+        went_well: fd.get('went_well'), student_reaction: fd.get('student_reaction'), extra: fd.get('extra'),
+        improvements: Array.prototype.map.call(f.querySelectorAll('.imp'), function (r) { return { session: r.querySelector('[name=session]').value, issue: r.querySelector('[name=issue]').value, suggestion: r.querySelector('[name=suggestion]').value }; }) };
+      if (!body.report.rating_overall || !body.report.rating_plan) { toast('수업 만족도와 교안 적합도를 골라 주세요.', true); return; }
+    }
+    b.disabled = true; var label = b.textContent; b.textContent = '처리 중…';
+    try {
+      var s = (await sb.auth.getSession()).data.session;
+      var res = await fetch(CFG.functions + '/instructor-action', { method: 'POST', headers: { 'content-type': 'application/json', apikey: CFG.key, authorization: 'Bearer ' + s.access_token }, body: JSON.stringify(body) });
+      var out = await res.json().catch(function () { return {}; });
+      if (!res.ok || out.error) throw new Error(out.error || '처리하지 못했습니다');
+      toast(act === 'submit_report' ? '보고서를 제출했습니다. 수고 많으셨습니다!' : '교안을 만들었습니다. 내려받아 쓰세요.');
+      await load(); await open(current);
+    } catch (err) { toast(err.message, true); b.disabled = false; b.textContent = label; if (b.dataset.key) b.dataset.key = newKey(); }
+  });
+
+  sb.auth.onAuthStateChange(function (ev) { if (ev === 'PASSWORD_RECOVERY') { linkType = 'recovery'; $('login').hidden = true; $('setpw').hidden = false; } });
+  boot();
+})();
+</script>
+</body>
+</html>

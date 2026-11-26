@@ -5,27 +5,12 @@
 //
 // 중복 클릭 방지: 화면이 버튼마다 고유 키(key)를 보내고, generation_jobs.idempotency_key 가
 // 고유값이라 같은 키로 두 번 와도 두 번째는 실행되지 않습니다.
-import { admin, catalog, cors, json, mdToHtml, esc, randomToken, sha256Hex } from "../_shared/common.ts";
+import { admin, catalog, cors, json, mdToHtml, esc, randomToken, sha256Hex, sendMail, queueMail, mailFrame, SITE_URL } from "../_shared/common.ts";
+import { matchInstructors, redesign } from "../_shared/lesson.ts";
 import { mockProposal } from "../_shared/proposal.ts";
 
 const FN_URL = `${Deno.env.get("SUPABASE_URL")}/functions/v1`;
 const AI_MODE = Deno.env.get("AI_MODE") ?? "mock";
-// 실제 메일 발송 (Resend). 두 값이 모두 설정되어 있을 때만 보내고, 없으면 "미리보기"로만 저장합니다.
-const RESEND_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
-const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "";        // 예: 비하이브 <edu@도메인>
-const MAIL_REPLY_TO = Deno.env.get("MAIL_REPLY_TO") ?? "";
-
-async function sendMail(to: string, subject: string, html: string): Promise<{ ok: boolean; id?: string; error?: string }> {
-  if (!RESEND_KEY || !MAIL_FROM) return { ok: false, error: "preview" };
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { authorization: `Bearer ${RESEND_KEY}`, "content-type": "application/json" },
-    body: JSON.stringify({ from: MAIL_FROM, to: [to], subject, html, ...(MAIL_REPLY_TO ? { reply_to: MAIL_REPLY_TO } : {}) }),
-  });
-  const out = await res.json().catch(() => ({}));
-  return res.ok ? { ok: true, id: out.id } : { ok: false, error: String(out.message ?? res.status) };
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors(req) });
   if (req.method !== "POST") return json(req, { error: "허용되지 않은 요청입니다" }, 405);
@@ -166,6 +151,166 @@ Deno.serve(async (req) => {
       else await db.from("email_outbox").update({ status: sent.error === "preview" ? "preview" : "failed", error: sent.error }).eq("id", id);
       await finish(c.jobId!, { status: sent.ok ? "done" : "failed", error: sent.ok ? null : sent.error });
       return json(req, { ok: sent.ok, mail: sent.ok ? "sent" : sent.error === "preview" ? "preview" : "failed", error: sent.ok ? undefined : (sent.error === "preview" ? "메일 발송 설정(RESEND_API_KEY, MAIL_FROM)이 아직 없습니다" : "발송 실패: " + sent.error) }, sent.ok ? 200 : 400);
+    }
+
+    /* =====================================================
+       2단계: 강사 등록 · AI 강사 추천 · 배정 · 교안 개선
+       ===================================================== */
+    const LEVELS = ["elem", "mid", "high", "univ", "adult"], CATS = ["ai", "sw", "career", "conv", "teacher", "biz"];
+    const arr = (v: unknown, allow?: string[]) => (Array.isArray(v) ? v : String(v ?? "").split(","))
+      .map((x) => String(x).trim()).filter((x) => x && (!allow || allow.includes(x))).slice(0, 20);
+
+    /* ---------- 강사 등록 · 수정 (새 강사는 초대 링크 생성) ---------- */
+    if (action === "save_instructor") {
+      const i = (b.instructor ?? {}) as Record<string, unknown>;
+      const row = {
+        name: String(i.name ?? "").trim().slice(0, 60), phone: String(i.phone ?? "").trim().slice(0, 30) || null,
+        specialties: arr(i.specialties, CATS), levels: arr(i.levels, LEVELS), regions: arr(i.regions),
+        career_years: Math.max(0, Math.min(60, Math.round(Number(i.career_years) || 0))),
+        bio: String(i.bio ?? "").slice(0, 1000) || null, active: i.active !== false,
+      };
+      if (!row.name) return json(req, { error: "강사 이름을 입력해 주세요" }, 400);
+      if (i.id) {
+        const up = await db.from("instructors").update(row).eq("id", String(i.id)).select("id");
+        if (up.error) throw up.error;
+        await db.from("profiles").update({ name: row.name, phone: row.phone }).eq("id", String(i.id));
+        return json(req, { ok: true });
+      }
+      const email = String(i.email ?? "").trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json(req, { error: "강사 이메일을 확인해 주세요" }, 400);
+      const exists = await db.from("instructors").select("id").eq("email", email).maybeSingle();
+      if (exists.data) return json(req, { error: "이미 등록된 강사 이메일입니다" }, 409);
+      const link = await db.auth.admin.generateLink({ type: "invite", email, options: { redirectTo: `${SITE_URL}/instructor.html`, data: { name: row.name } } });
+      if (link.error) return json(req, { error: "초대 링크를 만들지 못했습니다: " + link.error.message }, 400);
+      const uid = link.data.user!.id;
+      await db.from("profiles").upsert({ id: uid, role: "instructor", name: row.name, phone: row.phone });
+      const ins = await db.from("instructors").insert({ id: uid, email, ...row });
+      if (ins.error) throw ins.error;
+      const url = link.data.properties!.action_link;
+      const m = await queueMail(db, null, email, "[비하이브] 강사 계정 초대", mailFrame(
+        `<p style="line-height:1.7">${esc(row.name)} 강사님, 안녕하세요. 비하이브 강사로 등록되었습니다.<br>아래 버튼을 눌러 비밀번호를 정하시면 배정된 수업 확인, AI 교안 생성, 결과 보고를 하실 수 있습니다.</p>
+  <p style="text-align:center;margin:28px 0"><a href="${url}" style="display:inline-block;padding:14px 26px;border-radius:999px;background:#e9822d;color:#fff;font-weight:700;text-decoration:none">강사 계정 만들기</a></p>
+  <p style="font-size:13px;color:#77736d">링크는 한 번만 쓸 수 있고 일정 시간이 지나면 만료됩니다. 만료되면 비하이브에 새 링크를 요청해 주세요.</p>`));
+      return json(req, { ok: true, invite_link: url, ...m });
+    }
+
+    /* ---------- 강사 로그인 링크 다시 만들기 (초대 만료 · 비밀번호 분실) ---------- */
+    if (action === "instructor_link") {
+      const i = await db.from("instructors").select("id, email, name").eq("id", String(b.instructor_id ?? "")).single();
+      if (i.error) return json(req, { error: "강사를 찾을 수 없습니다" }, 404);
+      const u = await db.auth.admin.getUserById(i.data.id);
+      const type = u.data.user?.last_sign_in_at ? "recovery" : "invite";
+      const link = await db.auth.admin.generateLink({ type, email: i.data.email, options: { redirectTo: `${SITE_URL}/instructor.html` } } as never);
+      if (link.error) return json(req, { error: "링크를 만들지 못했습니다: " + link.error.message }, 400);
+      return json(req, { ok: true, invite_link: (link.data as { properties: { action_link: string } }).properties.action_link });
+    }
+
+    /* ---------- AI 강사 추천 ---------- */
+    if (action === "match_instructors") {
+      const requestId = String(b.request_id ?? "");
+      const r = await db.from("requests").select("*").eq("id", requestId).single();
+      if (r.error) return json(req, { error: "의뢰를 찾을 수 없습니다" }, 404);
+      if (!["confirmed", "assigned"].includes(r.data.status)) return json(req, { error: "학교가 확정(교육 진행하기)한 의뢰만 강사를 추천할 수 있습니다" }, 409);
+      const c = await claim("match", requestId);
+      if (c.error) return json(req, { error: c.error }, 400);
+      if (c.duplicate) return json(req, { ok: true, duplicate: c.duplicate });
+      try {
+        const cat = await catalog();
+        const course = cat.courses.find((x) => x.id === r.data.course_id);
+        const list = (await db.from("instructors").select("*").eq("active", true)).data ?? [];
+        const asg = (await db.from("assignments").select("id, instructor_id, status, request_id, requests(course_id)")).data ?? [];
+        const reps = (await db.from("reports").select("instructor_id, rating_overall, rating_plan")).data ?? [];
+        const stats: Record<string, { avgRating: number | null; reportCount: number; activeCount: number; sameCourseCount: number }> = {};
+        for (const i of list) {
+          const mine = reps.filter((x) => x.instructor_id === i.id);
+          stats[i.id] = {
+            reportCount: mine.length,
+            avgRating: mine.length ? mine.reduce((t, x) => t + (x.rating_overall + x.rating_plan) / 2, 0) / mine.length : null,
+            activeCount: asg.filter((a) => a.instructor_id === i.id && ["assigned", "plan_ready"].includes(a.status) && a.request_id !== requestId).length,
+            // deno-lint-ignore no-explicit-any
+            sameCourseCount: asg.filter((a: any) => a.instructor_id === i.id && a.status === "completed" && a.requests?.course_id === r.data.course_id).length,
+          };
+        }
+        const top = matchInstructors(r.data, course, list, stats);
+        await db.from("match_candidates").delete().eq("request_id", requestId);
+        if (top.length) {
+          const ins = await db.from("match_candidates").insert(top.map((t, k) => ({ request_id: requestId, rank: k + 1, ...t })));
+          if (ins.error) throw ins.error;
+        }
+        await finish(c.jobId!, { status: "done", model: "rules" });
+        return json(req, { ok: true, count: top.length });
+      } catch (e) { await finish(c.jobId!, { status: "failed", error: String((e as Error).message ?? e) }); throw e; }
+    }
+
+    /* ---------- 강사 최종 배정 (알림 + 메일) ---------- */
+    if (action === "assign_instructor") {
+      const requestId = String(b.request_id ?? ""), instructorId = String(b.instructor_id ?? "");
+      const r = await db.from("requests").select("*").eq("id", requestId).single();
+      if (r.error) return json(req, { error: "의뢰를 찾을 수 없습니다" }, 404);
+      if (!["confirmed", "assigned"].includes(r.data.status)) return json(req, { error: "확정된 의뢰만 배정할 수 있습니다" }, 409);
+      const i = await db.from("instructors").select("*").eq("id", instructorId).single();
+      if (i.error) return json(req, { error: "강사를 찾을 수 없습니다" }, 404);
+      const prev = await db.from("assignments").select("*").eq("request_id", requestId).maybeSingle();
+      if (prev.data?.status === "completed") return json(req, { error: "이미 수업이 끝난 의뢰입니다" }, 409);
+      if (prev.data?.instructor_id === instructorId) return json(req, { ok: true, duplicate: "assigned" });
+      const up = prev.data
+        ? await db.from("assignments").update({ instructor_id: instructorId, status: "assigned", assigned_by: me, assigned_at: new Date().toISOString() }).eq("id", prev.data.id).select("id").single()
+        : await db.from("assignments").insert({ request_id: requestId, instructor_id: instructorId, assigned_by: me }).select("id").single();
+      if (up.error) throw up.error;
+      await db.from("requests").update({ status: "assigned" }).eq("id", requestId);
+      if (prev.data) await db.from("notifications").insert({ user_id: prev.data.instructor_id, kind: "unassigned", title: `${r.data.org_name} 수업 배정이 변경되었습니다`, body: "다른 강사로 배정이 바뀌었습니다." });
+      const cat = await catalog();
+      const title = cat.courses.find((x) => x.id === r.data.course_id)?.title ?? r.data.course_id;
+      const link = `${SITE_URL}/instructor.html#a=${up.data.id}`;
+      await db.from("notifications").insert({ user_id: instructorId, kind: "assigned", title: `새 수업 배정: ${r.data.org_name}`, body: `${title} · ${r.data.sessions}차시 · ${r.data.preferred_dates ?? "일정 협의"}`, link });
+      const m = await queueMail(db, requestId, i.data.email, `[비하이브] 새 수업 배정: ${r.data.org_name}`, mailFrame(
+        `<p style="line-height:1.7">${esc(i.data.name)} 강사님, 새 수업에 배정되었습니다.</p>
+  <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+    <tr><th style="text-align:left;padding:8px 10px;background:#f5f2ec;border:1px solid #e6e1d8;width:90px">학교</th><td style="padding:8px 10px;border:1px solid #e6e1d8">${esc(r.data.org_name)}</td></tr>
+    <tr><th style="text-align:left;padding:8px 10px;background:#f5f2ec;border:1px solid #e6e1d8">수업</th><td style="padding:8px 10px;border:1px solid #e6e1d8">${esc(title)} · ${r.data.sessions}차시 × ${r.data.minutes_per_session}분</td></tr>
+    <tr><th style="text-align:left;padding:8px 10px;background:#f5f2ec;border:1px solid #e6e1d8">일정</th><td style="padding:8px 10px;border:1px solid #e6e1d8">${esc(r.data.preferred_dates ?? "협의")}</td></tr>
+  </table>
+  <p style="text-align:center;margin:26px 0"><a href="${link}" style="display:inline-block;padding:14px 26px;border-radius:999px;background:#e9822d;color:#fff;font-weight:700;text-decoration:none">수업 확인 · AI 교안 만들기</a></p>`));
+      return json(req, { ok: true, assignment_id: up.data.id, ...m });
+    }
+
+    /* ---------- 교안 개선안 만들기 (결과 보고서 → 차시별 개선 사항) ---------- */
+    if (action === "redesign_course") {
+      const courseId = String(b.course_id ?? ""), level = String(b.level ?? "");
+      const revs = (await db.from("course_revisions").select("*").eq("course_id", courseId).eq("level", level).order("version", { ascending: false })).data ?? [];
+      const used = new Set(revs.filter((x) => x.status !== "rejected").flatMap((x) => x.source_report_ids as string[]));
+      const reps = ((await db.from("reports").select("*").eq("course_id", courseId).eq("level", level)).data ?? []).filter((x) => !used.has(x.id));
+      if (!reps.length) return json(req, { error: "아직 개선안에 반영하지 않은 결과 보고서가 없습니다" }, 409);
+      const c = await claim("redesign", reps[0].id);
+      if (c.error) return json(req, { error: c.error }, 400);
+      if (c.duplicate) return json(req, { ok: true, duplicate: c.duplicate });
+      try {
+        const lastApproved = revs.find((x) => x.status === "approved");
+        const out = redesign(reps, (lastApproved?.notes ?? []) as never);
+        await db.from("course_revisions").delete().eq("course_id", courseId).eq("level", level).eq("status", "draft");
+        const version = (revs.filter((x) => x.status !== "draft")[0]?.version ?? 0) + 1;
+        const ins = await db.from("course_revisions").insert({ course_id: courseId, level, version, summary: out.summary, notes: out.notes, source_report_ids: reps.map((x) => x.id), model: "rules" }).select("id").single();
+        if (ins.error) throw ins.error;
+        await finish(c.jobId!, { status: "done", model: "rules" });
+        return json(req, { ok: true, revision_id: ins.data.id });
+      } catch (e) { await finish(c.jobId!, { status: "failed", error: String((e as Error).message ?? e) }); throw e; }
+    }
+
+    /* ---------- 개선안 수정 · 승인 · 반려 ---------- */
+    if (action === "save_revision" || action === "approve_revision" || action === "reject_revision") {
+      const id = String(b.revision_id ?? "");
+      const patch: Record<string, unknown> = {};
+      if (Array.isArray(b.notes)) patch.notes = (b.notes as Record<string, unknown>[]).slice(0, 100).map((n) => ({
+        session: n.session == null || n.session === "" ? null : Math.round(Number(n.session)) || null,
+        text: String(n.text ?? "").slice(0, 500), count: Math.max(1, Math.round(Number(n.count) || 1)),
+      })).filter((n) => n.text);
+      if (typeof b.summary === "string") patch.summary = b.summary.slice(0, 1000);
+      if (action === "approve_revision") Object.assign(patch, { status: "approved", approved_by: me, approved_at: new Date().toISOString() });
+      if (action === "reject_revision") patch.status = "rejected";
+      const up = await db.from("course_revisions").update(patch).eq("id", id).eq("status", "draft").select("id");
+      if (up.error) throw up.error;
+      if (!up.data?.length) return json(req, { error: "검토 중(초안)인 개선안만 바꿀 수 있습니다" }, 409);
+      return json(req, { ok: true });
     }
 
     return json(req, { error: "알 수 없는 작업입니다" }, 400);
