@@ -10,6 +10,21 @@ import { mockProposal } from "../_shared/proposal.ts";
 
 const FN_URL = `${Deno.env.get("SUPABASE_URL")}/functions/v1`;
 const AI_MODE = Deno.env.get("AI_MODE") ?? "mock";
+// 실제 메일 발송 (Resend). 두 값이 모두 설정되어 있을 때만 보내고, 없으면 "미리보기"로만 저장합니다.
+const RESEND_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
+const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "";        // 예: 비하이브 <edu@도메인>
+const MAIL_REPLY_TO = Deno.env.get("MAIL_REPLY_TO") ?? "";
+
+async function sendMail(to: string, subject: string, html: string): Promise<{ ok: boolean; id?: string; error?: string }> {
+  if (!RESEND_KEY || !MAIL_FROM) return { ok: false, error: "preview" };
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { authorization: `Bearer ${RESEND_KEY}`, "content-type": "application/json" },
+    body: JSON.stringify({ from: MAIL_FROM, to: [to], subject, html, ...(MAIL_REPLY_TO ? { reply_to: MAIL_REPLY_TO } : {}) }),
+  });
+  const out = await res.json().catch(() => ({}));
+  return res.ok ? { ok: true, id: out.id } : { ok: false, error: String(out.message ?? res.status) };
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors(req) });
@@ -64,7 +79,10 @@ Deno.serve(async (req) => {
         const p = mockProposal(r.data, await catalog());
         const version = (prev.data?.[0]?.version ?? 0) + 1;
         await db.from("proposals").update({ status: "superseded" }).eq("request_id", requestId).eq("status", "draft");
-        const ins = await db.from("proposals").insert({ request_id: requestId, version, title: p.title, content_md: p.md, model: "mock" }).select("id").single();
+        const ins = await db.from("proposals").insert({
+          request_id: requestId, version, title: p.title, content_md: p.md, model: "mock",
+          quote_total: p.quote?.total ?? null, quote_detail: p.quote ?? null,
+        }).select("id").single();
         if (ins.error) throw ins.error;
         await db.from("requests").update({ status: "proposal_ready" }).eq("id", requestId);
         await finish(c.jobId!, { status: "done", model: "mock" });
@@ -116,12 +134,38 @@ Deno.serve(async (req) => {
   </p>
   <p style="font-size:13px;color:#77736d;line-height:1.7">버튼을 누르시면 교육이 확정되고, 담당 강사 배정 후 일정을 다시 안내드립니다.<br>수정이 필요하시면 이 메일에 답장해 주세요.</p>
 </div>`;
+      const subject = `[비하이브] ${p.data.title}`;
       const ob = await db.from("email_outbox").insert({
-        request_id: r.id, to_email: r.contact_email, subject: `[비하이브] ${p.data.title}`, body_html: html, status: "preview",
+        request_id: r.id, to_email: r.contact_email, subject, body_html: html, status: "preview",
       }).select("id").single();
       await db.from("requests").update({ status: "proposal_sent" }).eq("id", r.id);
+
+      // 실제 발송 (설정이 없으면 미리보기로 남기고, 관리자가 직접 보낸 뒤 "보냄"으로 표시)
+      const sent = await sendMail(r.contact_email, subject, html);
+      if (sent.ok) await db.from("email_outbox").update({ status: "sent", sent_at: new Date().toISOString(), provider_id: sent.id }).eq("id", ob.data!.id);
+      else if (sent.error !== "preview") await db.from("email_outbox").update({ status: "failed", error: sent.error }).eq("id", ob.data!.id);
       await finish(c.jobId!, { status: "done" });
-      return json(req, { ok: true, outbox_id: ob.data?.id });
+      return json(req, { ok: true, outbox_id: ob.data?.id, mail: sent.ok ? "sent" : sent.error === "preview" ? "preview" : "failed", mail_error: sent.ok ? undefined : sent.error });
+    }
+
+    /* ---------- 미리보기 메일을 관리자가 직접 보냈다고 표시 / 실패한 메일 다시 보내기 ---------- */
+    if (action === "mark_mail_sent" || action === "resend_mail") {
+      const id = String(b.outbox_id ?? "");
+      const m = await db.from("email_outbox").select("*").eq("id", id).single();
+      if (m.error) return json(req, { error: "메일을 찾을 수 없습니다" }, 404);
+      if (m.data.status === "sent") return json(req, { ok: true, duplicate: "sent" });
+      if (action === "mark_mail_sent") {
+        await db.from("email_outbox").update({ status: "sent", sent_at: new Date().toISOString(), error: "관리자가 직접 발송" }).eq("id", id);
+        return json(req, { ok: true, mail: "sent" });
+      }
+      const c = await claim("send_proposal", id);
+      if (c.error) return json(req, { error: c.error }, 400);
+      if (c.duplicate) return json(req, { ok: true, duplicate: c.duplicate });
+      const sent = await sendMail(m.data.to_email, m.data.subject, m.data.body_html);
+      if (sent.ok) await db.from("email_outbox").update({ status: "sent", sent_at: new Date().toISOString(), provider_id: sent.id, error: null }).eq("id", id);
+      else await db.from("email_outbox").update({ status: sent.error === "preview" ? "preview" : "failed", error: sent.error }).eq("id", id);
+      await finish(c.jobId!, { status: sent.ok ? "done" : "failed", error: sent.ok ? null : sent.error });
+      return json(req, { ok: sent.ok, mail: sent.ok ? "sent" : sent.error === "preview" ? "preview" : "failed", error: sent.ok ? undefined : (sent.error === "preview" ? "메일 발송 설정(RESEND_API_KEY, MAIL_FROM)이 아직 없습니다" : "발송 실패: " + sent.error) }, sent.ok ? 200 : 400);
     }
 
     return json(req, { error: "알 수 없는 작업입니다" }, 400);

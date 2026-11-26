@@ -25,6 +25,7 @@ Deno.serve(async (req) => {
     course_id: str(b.course_id, 60), level: str(b.level, 10),
     sessions: int(b.sessions), minutes_per_session: int(b.minutes_per_session),
     headcount: b.headcount === "" || b.headcount == null ? null : int(b.headcount),
+    class_count: b.class_count === "" || b.class_count == null ? null : int(b.class_count),
     preferred_dates: str(b.preferred_dates, 300) || null, location: str(b.location, 200) || null,
     notes: str(b.notes, 2000) || null,
     privacy_consent: b.privacy_consent === true,
@@ -40,6 +41,7 @@ Deno.serve(async (req) => {
   if (!(row.sessions >= 1 && row.sessions <= 40)) errors.push("차시는 1~40 사이로 입력해 주세요");
   if (!(row.minutes_per_session >= 20 && row.minutes_per_session <= 480)) errors.push("1차시 시간은 20~480분 사이로 입력해 주세요");
   if (row.headcount !== null && !(row.headcount >= 1 && row.headcount <= 2000)) errors.push("인원을 확인해 주세요");
+  if (row.class_count !== null && !(row.class_count >= 1 && row.class_count <= 60)) errors.push("학급 수는 1~60 사이로 입력해 주세요");
   if (!row.privacy_consent) errors.push("개인정보 수집 · 이용에 동의해 주세요");
   if (row.submit_key.length < 16) errors.push("잘못된 요청입니다. 새로고침 후 다시 시도해 주세요");
   try {

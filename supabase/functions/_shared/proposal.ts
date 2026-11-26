@@ -1,11 +1,11 @@
 // 교육 제안서 생성
 //  - AI_MODE=mock (기본): 수업 데이터만으로 실제와 같은 형식의 제안서를 만듭니다. 비용 0원.
 //  - AI_MODE=claude    : (크레딧 충전 후 연결 예정) Claude Sonnet 5.5 로 맞춤 제안서를 작성합니다.
-import type { Catalog, Course, Level } from "./common.ts";
+import type { Catalog, Course, Level, Quote } from "./common.ts";
 
 export type RequestRow = {
   org_name: string; org_type: string; contact_name: string; course_id: string; level: string;
-  sessions: number; minutes_per_session: number; headcount: number | null;
+  sessions: number; minutes_per_session: number; headcount: number | null; class_count: number | null;
   preferred_dates: string | null; location: string | null; notes: string | null;
 };
 
@@ -26,13 +26,31 @@ function planSessions(steps: string[], n: number): string[][] {
   return plan;
 }
 
-export function mockProposal(r: RequestRow, cat: Catalog): { title: string; md: string } {
+const won = (n: number) => n.toLocaleString("ko-KR") + "원";
+
+/** 견적 표 (마크다운) */
+export function quoteMd(q: Quote | null, no: number): string[] {
+  if (!q) return [];
+  return [
+    "", `## ${no}. 견적`,
+    "| 항목 | 산출 | 금액 |", "| --- | --- | --- |",
+    ...q.lines.map((l) => `| ${l.item} | ${l.detail} | ${won(l.amount)} |`),
+    `| **합계** | ${q.vatNote} | **${won(q.total)}** |`,
+    `- ${q.travelNote}입니다.`,
+    ...(q.soleContract ? ["- 2천만 원 이하로 **1인 견적 수의계약**이 가능한 금액입니다. 견적서 · 사업자등록증 등 계약 서류는 요청 시 바로 보내드립니다."] : []),
+    "- 최종 금액은 일정 · 장소 확인 후 확정되며, 조건이 바뀌면 다시 안내드립니다.",
+  ];
+}
+
+export function mockProposal(r: RequestRow, cat: Catalog): { title: string; md: string; quote: Quote | null } {
   const course: Course | undefined = cat.courses.find((c) => c.id === r.course_id);
   if (!course) throw new Error("선택한 수업을 찾을 수 없습니다");
   const L: Level | undefined = course.levels[r.level] ?? Object.values(course.levels)[0];
   const lvLabel = cat.levels[r.level]?.label ?? r.level;
   const title = `${r.org_name} ${course.title} 교육 제안서`;
   const sessions = planSessions(L.steps ?? [], r.sessions);
+  let quote: Quote | null = null;
+  try { quote = cat.quote ? cat.quote(course, r.level, r.sessions, r.minutes_per_session, r.class_count, r.headcount) : null; } catch { quote = null; }
   const md = [
     `# ${title}`,
     `${r.contact_name}님, 비하이브에 교육을 의뢰해 주셔서 감사합니다. 요청하신 조건에 맞춰 아래와 같이 교육을 제안드립니다.`,
@@ -42,7 +60,7 @@ export function mockProposal(r: RequestRow, cat: Catalog): { title: string; md: 
     "| --- | --- |",
     `| 기관 | ${r.org_name} (${ORG[r.org_type] ?? "기관"}) |`,
     `| 과정 | ${course.title} |`,
-    `| 대상 | ${lvLabel}${r.headcount ? ` · ${r.headcount}명` : ""} |`,
+    `| 대상 | ${lvLabel}${r.class_count ? ` · ${r.class_count}학급` : ""}${r.headcount ? ` · ${r.headcount}명` : ""} |`,
     `| 구성 | ${r.sessions}차시 × ${r.minutes_per_session}분 |`,
     `| 희망 일정 | ${r.preferred_dates || "협의"} |`,
     `| 장소 | ${r.location || "협의"} |`,
@@ -69,10 +87,11 @@ export function mockProposal(r: RequestRow, cat: Catalog): { title: string; md: 
     "- 비하이브 강사가 기관으로 찾아가 수업을 진행합니다.",
     "- 수업 자료와 실습 준비물을 준비해 가며, 수업 후 활동 사진과 결과 보고 자료를 드립니다.",
     ...(r.notes ? ["", "## 7. 요청 사항 반영", `- 요청하신 내용: ${r.notes}`, "- 위 요청은 담당 강사와 확인해 세부 활동에 반영하겠습니다."] : []),
+    ...quoteMd(quote, r.notes ? 8 : 7),
     "",
-    `## ${r.notes ? 8 : 7}. 다음 단계`,
+    `## ${(r.notes ? 8 : 7) + (quote ? 1 : 0)}. 다음 단계`,
     "- 제안 내용이 괜찮으시면 메일의 **교육 진행하기** 버튼을 눌러 주세요.",
     "- 버튼을 누르시면 담당 강사를 배정해 일정과 세부 사항을 다시 안내드립니다.",
   ].join("\n");
-  return { title, md };
+  return { title, md, quote };
 }

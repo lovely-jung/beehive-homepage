@@ -39,7 +39,10 @@ export function randomToken(bytes = 32): string {
 /* ---------- 수업 데이터 (공개 사이트의 assets/data/courses.js 를 그대로 사용) ---------- */
 export type Level = { goal: string; time: string; steps: string[]; tools: string; output: string; link: string; sampleLevel?: boolean };
 export type Course = { id: string; cat: string; sub: string; title: string; summary: string; format: string[]; prep: string; safety?: string[]; levels: Record<string, Level>; sample?: boolean };
-export type Catalog = { courses: Course[]; levels: Record<string, { label: string }>; cats: { id: string; name: string; full: string }[] };
+export type QuoteLine = { item: string; detail: string; amount: number };
+export type Quote = { lines: QuoteLine[]; total: number; classes: number; vatNote: string; travelNote: string; soleContract: boolean };
+export type QuoteFn = (course: Course, level: string, sessions: number, minutes: number, classes: number | null, headcount: number | null) => Quote | null;
+export type Catalog = { courses: Course[]; levels: Record<string, { label: string }>; cats: { id: string; name: string; full: string }[]; quote: QuoteFn | null };
 
 let cache: { at: number; data: Catalog } | null = null;
 export async function catalog(): Promise<Catalog> {
@@ -47,10 +50,16 @@ export async function catalog(): Promise<Catalog> {
   const res = await fetch(`${SITE_URL}/assets/data/courses.js?t=${Date.now()}`);
   if (!res.ok) throw new Error(`수업 데이터를 불러오지 못했습니다 (${res.status})`);
   const code = await res.text();
-  // courses.js 는 window.BH_* 에 값을 넣는 파일이라, 빈 window 객체를 넘겨 값만 꺼냅니다.
+  // courses.js · pricing.js 는 window.BH_* 에 값을 넣는 파일이라, 빈 window 객체를 넘겨 값만 꺼냅니다.
   const win: Record<string, unknown> = {};
   new Function("window", code)(win);
-  const data: Catalog = { courses: win.BH_COURSES as Course[], levels: win.BH_LEVELS as Catalog["levels"], cats: win.BH_CATEGORIES as Catalog["cats"] };
+  // 견적 기준 (없거나 못 불러오면 견적 없이 제안서만 만듭니다)
+  try {
+    const pr = await fetch(`${SITE_URL}/assets/data/pricing.js?t=${Date.now()}`);
+    if (pr.ok) new Function("window", await pr.text())(win);
+  } catch { /* 견적 생략 */ }
+  const qf = typeof win.BH_QUOTE === "function" ? (win.BH_QUOTE as QuoteFn).bind(win) : null;
+  const data: Catalog = { courses: win.BH_COURSES as Course[], levels: win.BH_LEVELS as Catalog["levels"], cats: win.BH_CATEGORIES as Catalog["cats"], quote: qf };
   if (!Array.isArray(data.courses)) throw new Error("수업 데이터 형식이 올바르지 않습니다");
   cache = { at: Date.now(), data };
   return data;
