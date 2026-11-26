@@ -128,7 +128,8 @@
         s = p.addSlide();
         s.addText([{ text: f[0], options: { color: C.accent, bold: true } }, { text: '   ' + f[1] + '분', options: { color: C.soft } }],
           { x: X, y: 0.75, w: CW, h: 0.45, fontFace: FONT, fontSize: 16, margin: 0 });
-        big(s, f[2], { x: X, y: 1.6, w: CW * 0.92, h: 4.2, fontSize: size(f[2], 34, 30, 26), lineSpacingMultiple: 1.15 });
+        var scr = it.screens && it.screens[k];   // AI 교안: 학생용 짧은 화면 문구, 없으면 활동 설명
+        big(s, scr || f[2], { x: X, y: 1.6, w: CW * 0.92, h: 4.2, fontSize: scr ? size(scr, 40, 36, 32) : size(f[2], 34, 30, 26), lineSpacingMultiple: 1.15 });
         // 진행 표시: 지난 단계 · 지금 단계(주황) · 남은 단계
         var dw = Math.min(0.55, (CW * 0.5) / n);
         for (var j = 0; j < n; j++) s.addShape(p.ShapeType.rect, { x: X + j * (dw + 0.08), y: 6.25, w: dw, h: 0.07, fill: { color: j === k ? C.accent : j < k ? C.faint : C.line }, line: { type: 'none' } });

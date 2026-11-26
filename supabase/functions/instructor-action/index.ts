@@ -3,8 +3,11 @@
 //   submit_report        : 수업 결과 보고서 제출 (교안 평가 · 차시별 개선 의견)
 import { admin, catalog, cors, json, whoAmI } from "../_shared/common.ts";
 import { buildPlan, planToMd, type RevisionNote } from "../_shared/lesson.ts";
+import { aiPlan, AI_MODEL } from "../_shared/ai-lesson.ts";
 
-const AI_MODE = Deno.env.get("AI_MODE") ?? "mock";
+// 실제 AI 사용: AI_MODE=claude 이고 ANTHROPIC_API_KEY 비밀값이 있을 때. 아니면 규칙 기반 교안
+const USE_AI = (Deno.env.get("AI_MODE") ?? "") === "claude" && !!Deno.env.get("ANTHROPIC_API_KEY");
+
 const txt = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "") || null;
 
 Deno.serve(async (req) => {
@@ -41,18 +44,18 @@ Deno.serve(async (req) => {
         return json(req, { error: "교안은 수업당 5번까지 만들 수 있습니다. 이전 교안을 내려받아 써 주세요" }, 409);
       }
       try {
-        if (AI_MODE !== "mock") throw new Error("실제 AI 연결은 크레딧 충전 후 설정합니다 (현재는 AI_MODE=mock)");
         // 승인된 교안 개선 사항 (같은 수업 · 같은 대상)
         const revs = (await db.from("course_revisions").select("version, notes").eq("course_id", r.course_id).eq("level", r.level).eq("status", "approved").order("version", { ascending: false })).data ?? [];
         const notes = (revs[0]?.notes ?? []) as RevisionNote[];
-        const data = buildPlan(r, await catalog(), revs.length, notes);
+        let data = buildPlan(r, await catalog(), revs.length, notes), model = "rules", note = "";
+        if (USE_AI) { const out = await aiPlan(data); if (out.written) { data = out.data; model = AI_MODEL; } note = out.usageNote; }
         const md = planToMd(data);
         const version = (prev[0]?.version ?? 0) + 1;
-        const ins = await db.from("lesson_plans").insert({ assignment_id: a.data.id, version, content_md: md, content_json: data, model: "mock", revision_version: revs.length }).select("id").single();
+        const ins = await db.from("lesson_plans").insert({ assignment_id: a.data.id, version, content_md: md, content_json: data, model, revision_version: revs.length }).select("id").single();
         if (ins.error) throw ins.error;
         if (a.data.status === "assigned") await db.from("assignments").update({ status: "plan_ready" }).eq("id", a.data.id);
-        await db.from("generation_jobs").update({ status: "done", model: "mock", finished_at: new Date().toISOString() }).eq("id", job.data.id);
-        return json(req, { ok: true, lesson_plan_id: ins.data.id, version });
+        await db.from("generation_jobs").update({ status: "done", model, error: note || null, finished_at: new Date().toISOString() }).eq("id", job.data.id);
+        return json(req, { ok: true, lesson_plan_id: ins.data.id, version, ai: model !== "rules", note });
       } catch (e) {
         await db.from("generation_jobs").update({ status: "failed", error: String((e as Error).message ?? e), finished_at: new Date().toISOString() }).eq("id", job.data.id);
         throw e;

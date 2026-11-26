@@ -66,12 +66,14 @@ export type PlanSession = {
   hook: string; aim: string; flow: [string, number, string][]; ask: string; extra: string; out: string;
   feedback: string[];   // 이 차시에 반영된 현장 피드백 (교사용)
   generated?: boolean;  // 기본 수업안에 없어 덧붙인 심화 · 발표 차시
+  screens?: string[];   // 활동 단계별 학생용 화면 문구 (AI 교안일 때)
 };
 export type PlanData = {
   courseId: string; courseTitle: string; summary: string; org: string; level: string; levelLabel: string;
   sessions: number; minutes: number; classes: number | null; headcount: number | null; dates: string | null; location: string | null;
   goal: string; tools: string; prep: string; output: string; link: string; safety: string[]; requestNotes: string | null;
   version: number; feedbackRounds: number; generalFeedback: string[]; fitNote: string; items: PlanSession[];
+  ai?: boolean;         // 실제 AI(Claude)로 쓴 교안인지
 };
 
 const fb = (n: RevisionNote) => n.text + (n.count && n.count > 1 ? ` (강사 ${n.count}명 의견)` : "");
@@ -139,7 +141,7 @@ export function planToMd(d: PlanData): string {
   const lines: string[] = [
     `# ${d.courseTitle} 교사용 지도안`,
     `${d.org} · ${d.levelLabel}${d.classes ? ` ${d.classes}학급` : ""}${d.headcount ? ` · ${d.headcount}명` : ""} · ${d.sessions}차시 × ${d.minutes}분`,
-    "", `> 교안 버전 v${d.version}${d.feedbackRounds ? ` · 현장 피드백 ${d.feedbackRounds}회 반영` : " · 기본 수업안"}`,
+    "", `> 교안 버전 v${d.version}${d.feedbackRounds ? ` · 현장 피드백 ${d.feedbackRounds}회 반영` : " · 기본 수업안"}${d.ai ? " · AI 작성" : ""}`,
     "", "## 수업 개요", "| 항목 | 내용 |", "| --- | --- |",
     `| 학습 목표 | ${d.goal} |`, `| 사용 도구 | ${d.tools} |`, `| 준비 사항 | ${d.prep} |`, `| 최종 결과물 | ${d.output} |`, `| 교과 연계 | ${d.link} |`,
     `| 일정 · 장소 | ${d.dates || "협의"} · ${d.location || "협의"} |`,
@@ -153,7 +155,7 @@ export function planToMd(d: PlanData): string {
     lines.push("", `### ${s.no}차시 ${s.title} (${s.min}분)`);
     if (s.hook) lines.push(`- **여는 장치:** ${s.hook}`);
     if (s.aim) lines.push(`- **차시 목표:** ${s.aim}`);
-    lines.push("", "| 단계 | 시간 | 활동 |", "| --- | --- | --- |", ...s.flow.map((f) => `| ${f[0]} | ${f[1]}분 | ${f[2]} |`), "");
+    lines.push("", "| 단계 | 시간 | 화면 안내 · 진행 방법 |", "| --- | --- | --- |", ...s.flow.map((f, k) => `| ${f[0]} | ${f[1]}분 | ${s.screens?.[k] ? `**${s.screens[k]}** ` : ""}${f[2]} |`), "");
     if (s.ask) lines.push(`- **핵심 발문:** ${s.ask}`);
     if (s.extra) lines.push(`- **시간이 남으면:** ${s.extra}`);
     if (s.out) lines.push(`- **차시 산출물:** ${s.out}`);

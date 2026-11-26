@@ -233,7 +233,7 @@ details.prop summary{cursor:pointer;font-size:13.5px;font-weight:700;color:var(-
     h += '<div class="card"><h2>AI 교안' + (LP ? ' <span class="badge b-plan_ready">' + LP.version + '번째 · 교안 v' + (LP.revision_version + 1) + '</span>' : '') + '</h2>' +
       (LP ? '<div class="btns noprint">' + (LP.content_json ? '<button class="btn main" data-dl="pptx">수업 슬라이드(PPT) 내려받기</button>' : '') +
           '<button class="btn" data-dl="doc">교사용 지도안 (Word)</button><button class="btn" data-dl="print">지도안 인쇄 · PDF</button>' +
-          (a.status !== 'completed' ? '<button class="btn" data-act="generate_lesson_plan" data-key="' + newKey() + '">다시 만들기</button>' : '') + '</div>' +
+          (a.status !== 'completed' ? '<button class="btn' + (LP.content_json ? '' : ' main') + '" data-act="generate_lesson_plan" data-key="' + newKey() + '">' + (LP.content_json ? '다시 만들기' : '수업 슬라이드 만들기') + '</button>' : '') + '</div>' +
           (LP.content_json ? '<p class="note">수업 슬라이드는 학생 화면용이고, 활동 설명 · 여는 장치 · 현장 피드백은 각 슬라이드의 <b>발표자 노트</b>에 들어 있습니다. 아래는 교사용 지도안입니다.</p>'
             : '<p class="note">이 교안은 슬라이드 기능 이전에 만들어졌습니다. <b>다시 만들기</b>를 누르면 수업 슬라이드(PPT)도 받을 수 있습니다.</p>') +
           '<div class="doc" id="doc">' + md2html(LP.content_md) + '</div>'
@@ -303,13 +303,13 @@ details.prop summary{cursor:pointer;font-size:13.5px;font-weight:700;color:var(-
         improvements: Array.prototype.map.call(f.querySelectorAll('.imp'), function (r) { return { session: r.querySelector('[name=session]').value, issue: r.querySelector('[name=issue]').value, suggestion: r.querySelector('[name=suggestion]').value }; }) };
       if (!body.report.rating_overall || !body.report.rating_plan) { toast('수업 만족도와 교안 적합도를 골라 주세요.', true); return; }
     }
-    b.disabled = true; var label = b.textContent; b.textContent = '처리 중…';
+    b.disabled = true; var label = b.textContent; b.textContent = act === 'generate_lesson_plan' ? 'AI가 교안을 쓰는 중… (1분 정도 걸려요)' : '처리 중…';
     try {
       var s = (await sb.auth.getSession()).data.session;
       var res = await fetch(CFG.functions + '/instructor-action', { method: 'POST', headers: { 'content-type': 'application/json', apikey: CFG.key, authorization: 'Bearer ' + s.access_token }, body: JSON.stringify(body) });
       var out = await res.json().catch(function () { return {}; });
       if (!res.ok || out.error) throw new Error(out.error || '처리하지 못했습니다');
-      toast(act === 'submit_report' ? '보고서를 제출했습니다. 수고 많으셨습니다!' : '교안을 만들었습니다. 내려받아 쓰세요.');
+      toast(act === 'submit_report' ? '보고서를 제출했습니다. 수고 많으셨습니다!' : (out.ai ? 'AI 교안을 만들었습니다. 수업 슬라이드를 내려받아 쓰세요.' : '교안을 만들었습니다. 수업 슬라이드를 내려받아 쓰세요.'));
       await load(); await open(current);
     } catch (err) { toast(err.message, true); b.disabled = false; b.textContent = label; if (b.dataset.key) b.dataset.key = newKey(); }
   });
