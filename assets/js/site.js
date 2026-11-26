@@ -13,6 +13,7 @@
   var CATS = window.BH_CATEGORIES || [];
   var COURSES = window.BH_COURSES || [];
   var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  if (page === 'index.html' && location.hash) { location.replace('school.html' + location.hash); return; } /* 예전 주소(./#programs 등)는 학교 교육 홈으로 */
   var q = new URLSearchParams(location.search);
   var BIZ_URL = 'biz/';
 
@@ -50,6 +51,7 @@
       '<button class="global-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primaryLinks">☰</button>' +
       '<div class="global-links" id="primaryLinks">' +
         '<a href="about.html"' + cur(page === 'about.html') + '>비하이브 소개</a>' +
+        '<a href="school.html"' + cur(page === 'school.html') + '>학교 교육</a>' +
         '<div class="nav-dropdown">' +
           '<button class="nav-trigger' + (curCat ? ' is-current' : '') + '" type="button" aria-expanded="false">교육 프로그램</button>' +
           '<div class="mega"><div class="mega-cols">' + cols + '</div>' +
@@ -57,8 +59,9 @@
           '<a class="mega-biz" href="' + BIZ_URL + '">기업 · 공공기관 교육은 <b>비하이브 비즈니스</b> <span>↗</span></a></div></div>' +
         '</div>' +
         '<a href="curriculum.html"' + cur(page === 'curriculum.html') + '>커리큘럼</a>' +
-        '<a href="./#stories">교육 사례</a>' +
-        '<a class="nav-cta" href="./#contact">교육 문의</a>' +
+        '<a href="school.html#stories">교육 사례</a>' +
+        '<a href="media.html"' + cur(page === 'media.html') + '>영상 제작</a>' +
+        '<a class="nav-cta" href="request.html"' + cur(page === 'request.html') + '>교육 의뢰</a>' +
       '</div>' +
     '</nav>';
 
@@ -74,7 +77,7 @@
   var footer = bizBanner +
     '<footer class="site-footer"><div class="content-wrap">' +
       '<a class="footer-brand" href="./"><b class="brand-word">beehive</b><span>배움의 가능성을 함께 키웁니다</span></a>' +
-      '<div class="footer-links"><a href="about.html">비하이브 소개</a><a href="program.html?cat=ai">교육 프로그램</a><a href="curriculum.html">커리큘럼</a><a href="./#stories">교육 사례</a><a href="' + BIZ_URL + '">기업 · 공공기관 교육 ↗</a></div>' +
+      '<div class="footer-links"><a href="about.html">비하이브 소개</a><a href="program.html?cat=ai">교육 프로그램</a><a href="curriculum.html">커리큘럼</a><a href="school.html#stories">교육 사례</a><a href="media.html">영상 제작</a><a href="' + BIZ_URL + '">기업 · 공공기관 교육 ↗</a></div>' +
       '<small>© BEEHIVE · LEARN, GROW, GO FURTHER</small>' +
     '</div></footer>';
 

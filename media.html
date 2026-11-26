@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>영상 제작 | 비하이브</title>
+<meta name="description" content="비하이브가 제작한 교육 콘텐츠, 홍보 영상, 행사 스케치, 숏폼 영상을 소개합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="assets/css/common.css">
+<link rel="stylesheet" href="assets/css/pages.css">
+<style>
+.media-top{padding-top:calc(var(--nav-h) + 48px);background:#26241f;color:#fff}
+.media-top .crumb,.media-top .crumb a{color:rgba(255,255,255,.6)}
+.media-top .page-lead{color:rgba(255,255,255,.78)}
+.media-top .hero-row{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap}
+.btn-order{display:inline-flex;align-items:center;gap:10px;padding:16px 24px;border-radius:99px;background:var(--orange);color:#fff;font-size:15px;font-weight:700;text-decoration:none;transition:transform .2s}
+.btn-order:hover{transform:translateY(-2px)}
+.v-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.v-filter button{padding:9px 16px;border:1px solid #ddd6ca;border-radius:99px;background:#fff;color:#5f5a52;font:inherit;font-size:13.5px;cursor:pointer}
+.v-filter button[aria-pressed="true"]{background:#26241f;border-color:#26241f;color:#fff}
+.v-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.v-card{display:flex;flex-direction:column}
+.v-frame{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#ece8e0}
+.v-frame iframe,.v-frame video{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover}
+.v-frame.empty{display:grid;place-items:center;color:#9a948a;font-size:13.5px}
+.v-frame.empty:before{content:"▶";display:block;margin:0 auto 6px;font-size:26px;color:#c9c2b6;text-align:center}
+.v-meta{padding:14px 2px 0}
+.v-meta small{font-size:11.5px;font-weight:800;letter-spacing:.1em;color:var(--orange)}
+.v-meta h3{margin:6px 0 6px;font-size:18px;letter-spacing:-.04em;word-break:keep-all}
+.v-meta p{margin:0;font-size:13.5px;line-height:1.65;color:var(--ink-soft);word-break:keep-all}
+.v-meta .who{margin-top:8px;font-size:12.5px;color:#99938a}
+.svc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.svc article{padding:22px;border-radius:16px;background:var(--paper)}
+.svc b{display:block;margin-bottom:8px;font-size:17px;letter-spacing:-.03em}
+.svc p{margin:0;font-size:13.5px;line-height:1.65;color:var(--ink-soft);word-break:keep-all}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;counter-reset:f}
+.flow article{padding:22px;border-top:2px solid #26241f}
+.flow article:before{counter-increment:f;content:"0" counter(f);font-size:12px;font-weight:800;color:var(--orange)}
+.flow b{display:block;margin:8px 0;font-size:17px}
+.flow p{margin:0;font-size:13.5px;line-height:1.65;color:var(--ink-soft);word-break:keep-all}
+.media-cta{background:#26241f}
+.media-cta .btn-order{background:#fff;color:#26241f}
+@media(max-width:900px){.v-grid,.svc,.flow{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.v-grid,.svc,.flow{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-page="media">
+<div id="site-nav"></div>
+<script src="assets/data/courses.js"></script>
+<script src="assets/data/videos.js"></script>
+<script src="assets/js/site.js"></script>
+<main>
+  <section class="page-top media-top"><div class="content-wrap">
+    <nav class="crumb" aria-label="현재 위치"><a href="./">홈</a><span>›</span><span>영상 제작</span></nav>
+    <div class="hero-row">
+      <div>
+        <h1>교육과 이야기를<br>영상으로 담습니다</h1>
+        <p class="page-lead">교육 현장을 아는 사람이 기획부터 촬영, 편집까지 직접 만듭니다.</p>
+      </div>
+      <a class="btn-order" href="#order">영상 제작 의뢰 <span>↗</span></a>
+    </div>
+  </div></section>
+
+  <div class="content-wrap">
+    <section class="sec-block" id="works">
+      <div class="block-head"><h2>제작 영상</h2><span id="v-count"></span></div>
+      <div class="v-filter" role="group" aria-label="영상 종류"></div>
+      <div class="v-grid" id="v-grid"></div>
+    </section>
+
+    <section class="sec-block" id="services">
+      <div class="block-head"><h2>제작 분야</h2></div>
+      <div class="svc">
+        <article><b>교육 콘텐츠</b><p>수업 도입 영상, 개념 설명, 온라인 강의 촬영 · 편집</p></article>
+        <article><b>홍보 영상</b><p>학교 · 기관 · 기업 소개, 프로그램 홍보 영상</p></article>
+        <article><b>행사 스케치</b><p>수업 · 캠프 · 축제 · 성과 발표회 현장 기록</p></article>
+        <article><b>숏폼 · SNS</b><p>릴스 · 쇼츠용 세로 영상, 시리즈 콘텐츠</p></article>
+      </div>
+    </section>
+
+    <section class="sec-block" id="flow">
+      <div class="block-head"><h2>제작 과정</h2></div>
+      <div class="flow">
+        <article><b>의뢰 · 상담</b><p>목적, 분량, 일정, 예산을 함께 정리합니다.</p></article>
+        <article><b>기획 · 구성안</b><p>메시지와 장면 구성, 촬영 계획을 제안합니다.</p></article>
+        <article><b>촬영 · 편집</b><p>현장 촬영 후 자막, 음악, 그래픽까지 편집합니다.</p></article>
+        <article><b>검수 · 납품</b><p>수정 의견을 반영해 용도에 맞는 형식으로 납품합니다.</p></article>
+      </div>
+    </section>
+  </div>
+
+  <div class="content-wrap" id="order">
+    <div class="cta-band media-cta"><div><h2>영상 제작을 맡겨 보세요</h2><p>어떤 영상이 필요한지 알려 주시면 구성안과 견적을 보내드립니다.</p></div>
+      <a class="btn-order" href="#order" data-order>영상 제작 의뢰 ↗</a></div>
+  </div>
+  <div id="site-footer"></div>
+</main>
+<script>
+(function () {
+  /* 영상 제작 의뢰 폼 주소 (준비되면 여기에 넣으면 위 · 아래 버튼이 모두 그 주소로 연결됩니다) */
+  var ORDER_URL = '';
+  if (ORDER_URL) document.querySelectorAll('.btn-order').forEach(function (a) { a.href = ORDER_URL; });
+
+  var V = window.BH_VIDEOS || [];
+  var TYPES = { edu: '교육 콘텐츠', promo: '홍보 영상', event: '행사 스케치', short: '숏폼' };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  function ytId(u) { var m = String(u || '').match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{6,})/); return m ? m[1] : ''; }
+  function frame(v) {
+    var id = ytId(v.youtube);
+    if (id) return '<div class="v-frame"><iframe src="https://www.youtube-nocookie.com/embed/' + id + '" title="' + esc(v.title) + '" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+    if (v.file) return '<div class="v-frame"><video src="' + esc(v.file) + '"' + (v.poster ? ' poster="' + esc(v.poster) + '"' : '') + ' controls preload="metadata"></video></div>';
+    return '<div class="v-frame empty"><span>영상 준비 중</span></div>';
+  }
+  var grid = document.getElementById('v-grid'), bar = document.querySelector('.v-filter'), count = document.getElementById('v-count');
+  var used = Object.keys(TYPES).filter(function (t) { return V.some(function (v) { return v.type === t; }); });
+  bar.innerHTML = '<button data-t="all" aria-pressed="true">전체</button>' + used.map(function (t) { return '<button data-t="' + t + '" aria-pressed="false">' + TYPES[t] + '</button>'; }).join('');
+  function render(t) {
+    var list = V.filter(function (v) { return t === 'all' || v.type === t; });
+    count.textContent = list.length + '편';
+    grid.innerHTML = list.map(function (v) {
+      return '<article class="v-card">' + frame(v) + '<div class="v-meta"><small>' + esc(TYPES[v.type] || '영상') + '</small><h3>' + esc(v.title) + '</h3><p>' + esc(v.desc) + '</p>' +
+        ((v.client || v.year) ? '<div class="who">' + esc([v.client, v.year].filter(Boolean).join(' · ')) + '</div>' : '') + '</div></article>';
+    }).join('') || '<p>등록된 영상이 없습니다.</p>';
+  }
+  bar.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    bar.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+    render(b.getAttribute('data-t'));
+  });
+  render('all');
+})();
+</script>
+</body>
+</html>
