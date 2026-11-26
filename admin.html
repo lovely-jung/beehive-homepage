@@ -69,6 +69,19 @@ button{font:inherit;cursor:pointer}
     <label for="pw">비밀번호</label><input id="pw" type="password" autocomplete="current-password" required>
     <button type="submit">로그인</button>
     <div class="msg" id="loginMsg" role="alert"></div>
+    <p style="margin:14px 0 0;text-align:center"><button type="button" id="forgot" style="border:0;background:none;color:#77736d;font-size:13px;text-decoration:underline">비밀번호를 잊으셨나요?</button></p>
+  </form>
+</section>
+
+<!-- 초대 메일 · 비밀번호 재설정 링크로 들어왔을 때 -->
+<section class="login" id="setpw" hidden>
+  <h1>비밀번호 정하기</h1>
+  <p>운영 관리 화면에 로그인할 비밀번호를 정해 주세요. (8자 이상)</p>
+  <form id="pwForm">
+    <label for="pw1">새 비밀번호</label><input id="pw1" type="password" autocomplete="new-password" minlength="8" required>
+    <label for="pw2">한 번 더</label><input id="pw2" type="password" autocomplete="new-password" minlength="8" required>
+    <button type="submit">비밀번호 저장</button>
+    <div class="msg" id="pwMsg" role="alert"></div>
   </form>
 </section>
 
@@ -82,6 +95,8 @@ button{font:inherit;cursor:pointer}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 (function () {
+  // 초대 · 재설정 링크(#...type=invite / recovery)는 클라이언트가 주소를 읽기 전에 먼저 확인해 둡니다
+  var linkType = (location.hash.match(/type=(invite|recovery)/) || [])[1] || null;
   var CFG = window.BH_SUPABASE, sb = window.supabase.createClient(CFG.url, CFG.key);
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); };
@@ -100,6 +115,7 @@ button{font:inherit;cursor:pointer}
   /* ---------- 로그인 ---------- */
   async function boot() {
     var s = (await sb.auth.getSession()).data.session;
+    if (s && linkType) { $('login').hidden = true; $('app').hidden = true; $('setpw').hidden = false; return; }
     if (!s) { $('login').hidden = false; $('app').hidden = true; $('who').textContent = ''; return; }
     var p = await sb.from('profiles').select('role, name').eq('id', s.user.id).maybeSingle();
     if (!p.data || p.data.role !== 'admin') {
@@ -115,6 +131,21 @@ button{font:inherit;cursor:pointer}
     var r = await sb.auth.signInWithPassword({ email: $('em').value.trim(), password: $('pw').value });
     if (r.error) { $('loginMsg').textContent = '이메일 또는 비밀번호를 확인해 주세요.'; return; }
     boot();
+  });
+
+  $('pwForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); $('pwMsg').textContent = '';
+    if ($('pw1').value !== $('pw2').value) { $('pwMsg').textContent = '두 비밀번호가 다릅니다.'; return; }
+    var r = await sb.auth.updateUser({ password: $('pw1').value });
+    if (r.error) { $('pwMsg').textContent = '저장하지 못했습니다: ' + r.error.message; return; }
+    linkType = null; history.replaceState(null, '', location.pathname); $('setpw').hidden = true;
+    toast('비밀번호를 저장했습니다.'); boot();
+  });
+  $('forgot').addEventListener('click', async function () {
+    var em = $('em').value.trim();
+    if (!em) { $('loginMsg').textContent = '이메일을 먼저 입력해 주세요.'; return; }
+    await sb.auth.resetPasswordForEmail(em, { redirectTo: location.origin + location.pathname });
+    $('loginMsg').style.color = '#4f7a45'; $('loginMsg').textContent = '가입된 주소라면 비밀번호 재설정 메일을 보냈습니다.';
   });
 
   /* ---------- 의뢰 목록 ---------- */
@@ -223,7 +254,7 @@ button{font:inherit;cursor:pointer}
     } catch (err) { toast(err.message, true); b.disabled = false; if (b.dataset.key) b.dataset.key = newKey(); /* 실패한 요청은 새 키로 다시 시도 */ }
   });
 
-  sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_OUT') { $('app').hidden = true; $('login').hidden = false; } });
+  sb.auth.onAuthStateChange(function (ev) { if (ev === 'PASSWORD_RECOVERY') { linkType = 'recovery'; $('login').hidden = true; $('setpw').hidden = false; } if (ev === 'SIGNED_OUT') { $('app').hidden = true; $('login').hidden = false; } });
   boot();
 })();
 </script>
