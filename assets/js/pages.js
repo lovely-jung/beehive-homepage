@@ -20,8 +20,8 @@
     if (!text) { document.body.classList.add('no-note'); return ''; }
     return '<div class="sample-note">' + esc(text) + '</div>';
   };
-  var cta = function (title, desc) {
-    return '<div class="content-wrap"><div class="cta-band"><div><h2>' + title + '</h2><p>' + desc + '</p></div><a href="./#contact">교육 문의하기 ↗</a></div></div>';
+  var cta = function (title, desc, href) {
+    return '<div class="content-wrap"><div class="cta-band"><div><h2>' + title + '</h2><p>' + desc + '</p></div><a href="' + (href || 'request.html') + '">교육 의뢰하기 ↗</a></div></div>';
   };
   var card = function (c, viaCat) {
     var from = viaCat && c.cat !== viaCat ? '<span class="ref">' + esc(catOf(c.cat).name) + ' 수업</span>' : '';
@@ -112,7 +112,7 @@
 
     var rel = coursesIn(c.cat).filter(function (x) { return x.id !== c.id; }).slice(0, 3);
     if (rel.length) html += '<section class="sec-block"><div class="block-head"><h2>' + esc(cat.name) + ' 분야의 다른 수업</h2><a class="text-link" href="program.html?cat=' + cat.id + '">전체 보기 <span>↗</span></a></div><div class="c-grid">' + rel.map(function (x) { return card(x, c.cat); }).join('') + '</div></section>';
-    html += '</div>' + cta('이 수업을 우리 학교 · 기관에 맞게', '대상, 인원, 시간을 알려주시면 차시와 활동을 맞춰 운영안을 보내드립니다.');
+    html += '</div>' + cta('이 수업을 우리 학교 · 기관에 맞게', '대상, 인원, 시간을 알려주시면 차시와 활동을 맞춰 제안서를 보내드립니다.', 'request.html?course=' + c.id);
     root.innerHTML = html;
 
     function planHtml(id, k) {
@@ -148,6 +148,7 @@
           '<div><dt>교과 · 생기부 연계</dt><dd>' + esc(L.link) + '</dd></div>' +
         '</dl></div></div>' + planHtml(c.id, k);
       root.querySelectorAll('.lv-tabs button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-lv') === k); });
+      var go = root.querySelector('.cta-band a'); if (go) go.href = 'request.html?course=' + c.id + '&lv=' + k;
     }
     root.querySelectorAll('.lv-tabs button').forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-lv')); }); });
     var want = q.get('lv');
